@@ -1,10 +1,9 @@
 package rastest
 
-import org.apache.avro.Schema
+import org.apache.avro._
 import org.apache.avro.file.DataFileWriter
-import org.apache.avro.generic.{GenericData, GenericDatumWriter, GenericRecord}
-import org.apache.avro.io.EncoderFactory
-
+import org.apache.avro.generic._
+import org.apache.avro.io.{EncoderFactory, DatumWriter, DatumReader, DecoderFactory}
 import org.apache.spark.sql.SparkSession
 
 import java.io.{ByteArrayOutputStream, File}
@@ -25,7 +24,6 @@ object FileBasedAvroEventProducer {
     val logicalDateStr = logicalDate.toString
     val logicalDateDays = logicalDate.toEpochDay.toInt
     val tenantId = 42
-    val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
     val rnd = new Random()
 
     // Load schemas
@@ -47,6 +45,15 @@ object FileBasedAvroEventProducer {
     val baseOutputPath = s"C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/$logicalDateStr"
     val existingPath = s"$baseOutputPath/existing"
     val newPath = s"$baseOutputPath/new"
+
+    def serializeToBytes(record: GenericRecord, schema: Schema): Array[Byte] = {
+      val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](schema)
+      val out = new ByteArrayOutputStream()
+      val encoder = EncoderFactory.get().binaryEncoder(out, null)
+      writer.write(record, encoder)
+      encoder.flush()
+      out.toByteArray
+    }
 
     def generateWrapperRecord(customerId: String, eventType: String): GenericRecord = {
       val header = new GenericData.Record(headerSchema)
@@ -84,20 +91,10 @@ object FileBasedAvroEventProducer {
           (idSchema, rec)
       }
 
-      // Serialize payload record to bytes because wrapperSchema expects bytes
-      val payloadBytes = {
-        val out = new ByteArrayOutputStream()
-        val writer = new GenericDatumWriter[GenericRecord](payloadSchema)
-        val encoder = EncoderFactory.get().binaryEncoder(out, null)
-        writer.write(payloadRecord, encoder)
-        encoder.flush()
-        out.close()
-        java.nio.ByteBuffer.wrap(out.toByteArray)
-      }
-
+      val payloadBytes = serializeToBytes(payloadRecord, payloadSchema)
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
-      wrapper.put("payload", payloadBytes)
+      wrapper.put("payload", java.nio.ByteBuffer.wrap(payloadBytes))
 
       wrapper
     }
@@ -114,40 +111,39 @@ object FileBasedAvroEventProducer {
       dataFileWriter.close()
     }
 
-    // Existing customers (some subset for example, increase as needed)
-    val existingEvents = spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
-    existingEvents.mapPartitionsWithIndex { case (partitionId, part) =>
-      val ids = broadcastCustomerIds.value
-      val buffer = part.map { _ =>
-        val customerId = ids(rnd.nextInt(ids.size))
-        val eventType = eventTypes(rnd.nextInt(eventTypes.size))
-        generateWrapperRecord(customerId, eventType)
-      }.toList
+    // Existing customers (simulate 16K events, 64 partitions)
+    spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
+      .mapPartitionsWithIndex { case (partitionId, part) =>
+        val ids = broadcastCustomerIds.value
+        val buffer = part.map { _ =>
+          val customerId = ids(rnd.nextInt(ids.size))
+          val eventType = Seq("NAME", "ADDRESS", "IDENTIFICATION")(rnd.nextInt(3))
+          generateWrapperRecord(customerId, eventType)
+        }.toList
 
-      writeAvroRecords(existingPath, partitionId, buffer, wrapperSchema)
-      Iterator.empty
-    }.count()
+        writeAvroRecords(existingPath, partitionId, buffer, wrapperSchema)
+        Iterator.empty
+      }.count()
 
-    // New customers (example smaller count)
-    val newCustomers = spark.sparkContext.parallelize(1 to 800, numSlices = 32)
-    newCustomers.mapPartitionsWithIndex { case (partitionId, part) =>
-      val buffer = part.flatMap { _ =>
-        val p = rnd.nextInt(8)
-        val newCustomerId = f"${p}_9${rnd.nextInt(999999)}%06d"
-        Seq(
-          generateWrapperRecord(newCustomerId, "NAME"),
-          generateWrapperRecord(newCustomerId, "ADDRESS"),
-          generateWrapperRecord(newCustomerId, "ADDRESS"),
-          generateWrapperRecord(newCustomerId, "IDENTIFICATION"),
-          generateWrapperRecord(newCustomerId, "IDENTIFICATION")
-        )
-      }.toList
+    // New customers (simulate 4K customers × 5 events each, 32 partitions)
+    spark.sparkContext.parallelize(1 to 800, numSlices = 32)
+      .mapPartitionsWithIndex { case (partitionId, part) =>
+        val buffer = part.flatMap { _ =>
+          val newCustomerId = f"NEW_${rnd.nextInt(9999999)}%07d"
+          Seq(
+            generateWrapperRecord(newCustomerId, "NAME"),
+            generateWrapperRecord(newCustomerId, "ADDRESS"),
+            generateWrapperRecord(newCustomerId, "ADDRESS"),
+            generateWrapperRecord(newCustomerId, "IDENTIFICATION"),
+            generateWrapperRecord(newCustomerId, "IDENTIFICATION")
+          )
+        }.toList
 
-      writeAvroRecords(newPath, partitionId, buffer, wrapperSchema)
-      Iterator.empty
-    }.count()
+        writeAvroRecords(newPath, partitionId, buffer, wrapperSchema)
+        Iterator.empty
+      }.count()
 
-    println("✅ Valid Avro container files written.")
+    println("✅ Avro container files written with original schema.")
     spark.stop()
   }
 }
