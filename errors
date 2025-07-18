@@ -27,7 +27,7 @@ object AvroEventProducerWithPartitionedFolder {
     val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
     val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
-    val logicalDateDays = logicalDate.toEpochDay.toInt
+    val logicalDateStr = logicalDate.format(DateTimeFormatter.ISO_DATE)  // Partition folder: "logical_date=2025-04-03"
     val tenantId = 42
     val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
 
@@ -54,11 +54,13 @@ object AvroEventProducerWithPartitionedFolder {
       eventType: String,
       partitionId: String,
       isNew: Boolean = false
-    ): (String, Int, String, Int, String, String, Array[Byte], Array[Byte]) = {
+    ): (String, Int, String, String, String, String, Array[Byte], Array[Byte]) = {
+      // logical_date is String!
+
       // Build Avro header
       val header = new GenericData.Record(headerSchema)
       header.put("event_timestamp", System.currentTimeMillis())
-      header.put("logical_date", logicalDateDays)
+      header.put("logical_date", logicalDateStr)  // <- string!
       header.put("event_type", eventType)
       header.put("tenant_id", tenantId)
       header.put("entity_id", customerId)
@@ -109,21 +111,17 @@ object AvroEventProducerWithPartitionedFolder {
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
       wrapper.put("payload", java.nio.ByteBuffer.wrap(payloadBytes))
-
-      // Serialize wrapper as bytes for writing, or keep header/payload as needed
       val wrapperBytes = serialize(wrapperSchema, wrapper)
 
       (
-        partitionId, tenantId, customerId, logicalDateDays, eventType,
-        // These fields can be used for further partitioning or analysis
-        // Save either the full wrapperBytes, or the header and payload as Avro schema, your call
-        // We'll keep the structure for downstream access
+        partitionId, tenantId, customerId, logicalDateStr,  // logical_date as string!
         eventType,
+        eventType, // same as event_type, can remove if not needed
         payloadBytes,
         wrapperBytes
       )
     }
-
+    
     // ---- MODIFIED (existing customers): 4M events ----
     val nModified = 4000000
     val modifiedEvents = spark.sparkContext.parallelize(1 to nModified, numSlices = 64).map { _ =>
@@ -149,14 +147,14 @@ object AvroEventProducerWithPartitionedFolder {
       )
     }
 
-    // Convert to DataFrame
+    // Create DataFrame schema
     val eventSchema = StructType(Seq(
       StructField("partition_id", StringType),
       StructField("tenant_id", IntegerType),
       StructField("customer_id", StringType),
-      StructField("logical_date", IntegerType),
+      StructField("logical_date", StringType),  // <-- note: StringType
       StructField("event_type", StringType),
-      StructField("event_type2", StringType), // same as event_type, can be removed
+      StructField("event_type2", StringType),
       StructField("payload_bytes", BinaryType),
       StructField("wrapper_bytes", BinaryType)
     ))
@@ -164,16 +162,8 @@ object AvroEventProducerWithPartitionedFolder {
     val modifiedDF = spark.createDataFrame(modifiedEvents.map(Row.fromTuple), eventSchema)
     val newDF = spark.createDataFrame(newEvents.map(Row.fromTuple), eventSchema)
 
-    // If you want to keep the Avro structure, you should NOT DROP wrapper fields.
-    // You can either write the full wrapper as one Avro binary blob (hard for downstream),
-    // or if your Avro schema matches, you can reconstruct the wrapper
-
-    // For better Parquet usability, break out header fields as top-level columns before writing
-    // Partition by tenant/partition/logical_date
-
     // ---- Write Modified ----
     modifiedDF
-      .withColumn("event_timestamp", lit(System.currentTimeMillis())) // for example
       .write
       .mode(SaveMode.Overwrite)
       .partitionBy("tenant_id", "partition_id", "logical_date")
@@ -182,14 +172,13 @@ object AvroEventProducerWithPartitionedFolder {
 
     // ---- Write New ----
     newDF
-      .withColumn("event_timestamp", lit(System.currentTimeMillis())) // for example
       .write
       .mode(SaveMode.Overwrite)
       .partitionBy("tenant_id", "partition_id", "logical_date")
       .format("avro")
       .save(s"$baseOutputPath/new")
 
-    println(s"✅ Wrote Avro events: $baseOutputPath/modified and $baseOutputPath/new, partitioned folders")
+    println(s"✅ Wrote Avro events: $baseOutputPath/modified and $baseOutputPath/new, partitioned with logical_date=$logicalDateStr")
 
     spark.stop()
   }
