@@ -13,30 +13,23 @@ object PartitionedAvroEventConsumerBatch {
     val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
 
-    // Read each separately and union (avoids Spark's directory structure conflict)
+    // Read partitioned Avro files from both modified and new, then union
     val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
     val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
     val avroDF     = dfModified.unionByName(dfNew)
 
-    // Confirm the schema matches your expectations; uncomment for debugging:
-    // avroDF.printSchema()
-
-    // If your producer placed event_timestamp or payload in a different column, adjust as needed.
-    // Below assumes you have these as top-level columns;
-    // If not, just remove or adjust event_timestamp/payload as fits your actual schema.
-
+    // Select top-level columns expected by the merge job
     val parsed = avroDF.select(
       col("partition_id"),
       col("tenant_id"),
       col("customer_id"),
+      col("event_timestamp"),
+      col("logical_date"),
       col("event_type"),
-      col("payload_bytes").as("payload"),  // or adjust to col("payload") if that's the column
-      // If you want the event_timestamp, uncomment below, or remove if not present in your schema:
-      // col("event_timestamp"),
-      col("logical_date")
+      col("payload_bytes").as("payload")
     )
 
-    // Write as partitioned Parquet for downstream merge job
+    // Write partitioned Parquet output
     parsed.write
       .mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
