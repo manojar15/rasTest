@@ -1,12 +1,8 @@
 package rastest
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, DataFrame}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.avro._
-import org.apache.avro.Schema
-import org.apache.spark.sql.avro.SchemaConverters
-
 import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 
@@ -19,42 +15,47 @@ object PartitionedAvroFileEventConsumer {
 
     import spark.implicits._
 
-    // Input and output paths (adjust if needed)
-    val baseInputPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/*" // reading from existing avro folders (existing & new)
-    val baseOutputPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
-    val checkpointLocation = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/checkpoints_partitioned_files"
+    val avroInputPath = "file:///C:/Users/E5655076/RAS_RPT/obrandrastest/avro_output/*/*"
+    val outputPath = "file:///C:/Users/E5655076/RAS_RPT/obrandrastest/customer/tenant_data"
+    val checkpointLocation = "file:///C:/Users/E5655076/RAS_RPT/obrandrastest/customer/checkpoints_file_consumer"
 
-    // Read Avro schema and convert to Spark StructType
-    val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")), StandardCharsets.UTF_8)
-    val avroSchema = new Schema.Parser().parse(wrapperSchemaJson)
-    val sparkSchema: StructType = SchemaConverters.toSqlType(avroSchema).dataType.asInstanceOf[StructType]
+    // Read schema for CustomerEvent
+    val wrapperSchemaPath = "src/main/avro/CustomerEvent.avsc"
+    val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get(wrapperSchemaPath)), StandardCharsets.UTF_8)
 
-    // Read Avro files as streaming source with schema
-    val avroStreamDF = spark.readStream
+    // Read Avro files as a streaming source
+    val rawDF = spark.readStream
       .format("avro")
-      .schema(sparkSchema)
-      .load(baseInputPath) // reads all Avro files under existing and new folders
+      .load(avroInputPath)
 
-    // Extract fields from the nested structure
-    val parsed = avroStreamDF
+    // Deserialize using Avro schema
+    val parsedDF = rawDF
+      .withColumn("event", from_avro(col("value"), wrapperSchemaJson))
+      .withColumn("header", col("event.header"))
       .withColumn("customer_id", col("header.entity_id"))
       .withColumn("event_type", col("header.event_type"))
-      // 'logical_date' in Avro schema is int with logicalType 'date' (days since epoch)
-      // We convert to actual Date by adding to epoch '1970-01-01'
-      .withColumn("logical_date", expr("date_add(to_date('1970-01-01'), header.logical_date)"))
       .withColumn("tenant_id", col("header.tenant_id"))
-      .withColumn("partition_id", split(col("customer_id"), "_")(0))
-      .withColumn("event_timestamp", col("header.event_timestamp"))
-      .select("partition_id", "tenant_id", "customer_id", "event_timestamp", "logical_date", "event_type", "payload")
+      .withColumn("logical_date", col("header.logical_date").cast("date"))  // Cast properly
+      .withColumn("partition_id", split(col("header.entity_id"), "_")(0))   // Partition ID logic
+      .select(
+        col("partition_id"),
+        col("tenant_id"),
+        col("customer_id"),
+        col("event_type"),
+        col("logical_date"),
+        col("value")
+      )
 
-    // Write output as Parquet with partitions matching next job expectations
-    val query = parsed.writeStream
+    val query = parsedDF.writeStream
       .partitionBy("tenant_id", "partition_id", "logical_date")
       .format("parquet")
       .option("checkpointLocation", checkpointLocation)
-      .option("path", baseOutputPath)
+      .option("path", outputPath)
       .outputMode("append")
       .start()
+
+    // ✅ Print log to confirm stream started
+    println("Avro file consumer streaming job started successfully.")
 
     query.awaitTermination()
   }
