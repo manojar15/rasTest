@@ -14,7 +14,7 @@ import org.apache.avro.io.{EncoderFactory, DatumWriter}
 import org.apache.spark.sql.SparkSession
 import scala.io.Source
 
-object AvroEventFileGenerator {
+object ParallelPartitionedAvroProducer {
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
@@ -44,6 +44,7 @@ object AvroEventFileGenerator {
     val idSchema = new Schema.Parser().parse(idSchemaStr)
 
     val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
+    val avro_output = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val existingCustomerIds = spark.read.parquet(customerMetaPath)
       .select("customer_id").as[String].collect().toSet
     val broadcastCustomerIds = spark.sparkContext.broadcast(existingCustomerIds.toIndexedSeq)
@@ -97,7 +98,7 @@ object AvroEventFileGenerator {
     }
 
     // ------------ EXISTING CUSTOMERS ------------
-    val existingEvents = spark.sparkContext.parallelize(1 to 4000000, numSlices = 64)
+    val existingEvents = spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
 
     existingEvents.foreachPartition { (partIter: Iterator[Int]) =>
       val rnd = new Random()
@@ -108,7 +109,7 @@ object AvroEventFileGenerator {
         generateEvent(customerId, eventType)
       }.toSeq
 
-      val outFile = File.createTempFile("existing_", ".avro", new File("output/existing"))
+      val outFile = File.createTempFile("existing_", ".avro", new File(f"{avro_output}/existing"))
       val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](wrapperSchema)
       val dataFileWriter = new DataFileWriter[GenericRecord](writer)
       dataFileWriter.create(wrapperSchema, outFile)
@@ -117,7 +118,7 @@ object AvroEventFileGenerator {
     }
 
     // ------------ NEW CUSTOMERS ------------
-    val newCustomerRange = spark.sparkContext.parallelize(1 to 500000, numSlices = 32)
+    val newCustomerRange = spark.sparkContext.parallelize(1 to 4000, numSlices = 32)
 
     newCustomerRange.foreachPartition { (partIter: Iterator[Int]) =>
       val rnd = new Random()
@@ -133,7 +134,7 @@ object AvroEventFileGenerator {
         )
       }.toSeq
 
-      val outFile = File.createTempFile("new_", ".avro", new File("output/new"))
+      val outFile = File.createTempFile("new_", ".avro", new File(f"{avro_output}/new"))
       val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](wrapperSchema)
       val dataFileWriter = new DataFileWriter[GenericRecord](writer)
       dataFileWriter.create(wrapperSchema, outFile)
