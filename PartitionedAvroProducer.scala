@@ -4,7 +4,7 @@ import java.io.{ByteArrayOutputStream, File}
 import java.nio.ByteBuffer
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Random
+import java.util.{Random, UUID}
 
 import org.apache.avro._
 import org.apache.avro.generic._
@@ -18,10 +18,8 @@ object ParallelPartitionedAvroProducer {
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("Avro Event File Generator")
-      .master("local[8]")
-      .config("spark.executor.memory", "16g")
-      .config("spark.driver.memory", "16g")
+      .appName("Kafka-like Avro Event Generator")
+      .master("local[*]")
       .getOrCreate()
 
     import spark.implicits._
@@ -43,8 +41,10 @@ object ParallelPartitionedAvroProducer {
     val addressSchema = new Schema.Parser().parse(addressSchemaStr)
     val idSchema = new Schema.Parser().parse(idSchemaStr)
 
-    val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
-    val avro_output = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
+    val customerMetaPath = "C:/Users/E5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
+    val avroExistingDir = "C:/Users/E5655076/RAS_RPT/obrandrastest/customer/avro_output/existing"
+    val avroNewDir = "C:/Users/E5655076/RAS_RPT/obrandrastest/customer/avro_output/new"
+
     val existingCustomerIds = spark.read.parquet(customerMetaPath)
       .select("customer_id").as[String].collect().toSet
     val broadcastCustomerIds = spark.sparkContext.broadcast(existingCustomerIds.toIndexedSeq)
@@ -93,34 +93,33 @@ object ParallelPartitionedAvroProducer {
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
       wrapper.put("payload", ByteBuffer.wrap(payloadOut.toByteArray))
-
       wrapper
     }
 
-    // ------------ EXISTING CUSTOMERS ------------
-    val existingEvents = spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
+    // ------------ EXISTING CUSTOMERS (like Kafka partitioned production) ------------
+    val existingEventsRDD = spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
 
-    existingEvents.foreachPartition { (partIter: Iterator[Int]) =>
+    existingEventsRDD.foreachPartition { partIter =>
       val rnd = new Random()
       val customers = broadcastCustomerIds.value
       val records = partIter.map { _ =>
-        val customerId = customers(rnd.nextInt(customers.size))
-        val eventType = eventTypes(rnd.nextInt(eventTypes.size))
+        val customerId = customers(rnd.nextInt(customers.length))
+        val eventType = eventTypes(rnd.nextInt(eventTypes.length))
         generateEvent(customerId, eventType)
-      }.toSeq
+      }.toList
 
-      val outFile = File.createTempFile("existing_", ".avro", new File(f"{avro_output}/existing"))
+      val uniqueFile = new File(s"$avroExistingDir/existing_${UUID.randomUUID().toString}.avro")
       val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](wrapperSchema)
       val dataFileWriter = new DataFileWriter[GenericRecord](writer)
-      dataFileWriter.create(wrapperSchema, outFile)
+      dataFileWriter.create(wrapperSchema, uniqueFile)
       records.foreach(dataFileWriter.append)
       dataFileWriter.close()
     }
 
     // ------------ NEW CUSTOMERS ------------
-    val newCustomerRange = spark.sparkContext.parallelize(1 to 4000, numSlices = 32)
+    val newCustomersRDD = spark.sparkContext.parallelize(1 to 4000, numSlices = 32)
 
-    newCustomerRange.foreachPartition { (partIter: Iterator[Int]) =>
+    newCustomersRDD.foreachPartition { partIter =>
       val rnd = new Random()
       val records = partIter.flatMap { _ =>
         val partitionId = rnd.nextInt(8)
@@ -132,17 +131,17 @@ object ParallelPartitionedAvroProducer {
           generateEvent(newCustomerId, "IDENTIFICATION"),
           generateEvent(newCustomerId, "IDENTIFICATION")
         )
-      }.toSeq
+      }.toList
 
-      val outFile = File.createTempFile("new_", ".avro", new File(f"{avro_output}/new"))
+      val uniqueFile = new File(s"$avroNewDir/new_${UUID.randomUUID().toString}.avro")
       val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](wrapperSchema)
       val dataFileWriter = new DataFileWriter[GenericRecord](writer)
-      dataFileWriter.create(wrapperSchema, outFile)
+      dataFileWriter.create(wrapperSchema, uniqueFile)
       records.foreach(dataFileWriter.append)
       dataFileWriter.close()
     }
 
-    println("✅ Avro events generated and saved to local output directory.")
+    println("✅ All Avro events written as Kafka-style partitioned files.")
     spark.stop()
   }
 }
