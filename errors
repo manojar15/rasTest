@@ -1,10 +1,9 @@
 package rastest
 
 import org.apache.spark.sql.{SparkSession, SaveMode, Row}
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.avro.Schema
-import org.apache.avro.generic.{GenericRecord, GenericData}
+import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.avro.io.{DatumWriter, EncoderFactory}
 import org.apache.avro.generic.GenericDatumWriter
 import java.io.ByteArrayOutputStream
@@ -16,23 +15,22 @@ import scala.util.Random
 
 object AvroEventProducerWithPartitionedFolder {
   def main(args: Array[String]): Unit = {
-    // Spark setup
     val spark = SparkSession.builder()
       .appName("Partitioned Avro Event Producer (File)")
       .master("local[*]")
       .getOrCreate()
     import spark.implicits._
 
-    // Configs/paths
+    // Config
     val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
     val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
-    val logicalDateStr = logicalDate.format(DateTimeFormatter.ISO_DATE)  // e.g. "2025-04-03"
-    val logicalDateInt = logicalDate.toEpochDay.toInt                    // e.g. 20181
+    val logicalDateStr = logicalDate.format(DateTimeFormatter.ISO_DATE)  // "2025-04-03"
+    val logicalDateInt = logicalDate.toEpochDay.toInt                    // 20181 etc.
     val tenantId = 42
     val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
 
-    // Load Avro schemas
+    // Load Avro schemas (header, payloads, wrapper)
     val wrapperSchemaStr = Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString
     val nameSchemaStr = Source.fromFile("src/main/avro/NamePayload.avsc").mkString
     val addressSchemaStr = Source.fromFile("src/main/avro/AddressPayload.avsc").mkString
@@ -50,17 +48,16 @@ object AvroEventProducerWithPartitionedFolder {
 
     val random = new Random()
 
-    // Note: logical_date_int is what goes into Avro, logical_date_str is used for partitioning
     def buildEvent(
       customerId: String,
       eventType: String,
       partitionId: String,
       isNew: Boolean = false
-    ): (String, Int, String, Int, String, String, Array[Byte], Array[Byte], String) = {
-      // Build Avro header
+    ): (String, Int, String, Int, String, Array[Byte], Array[Byte], String) = {
+      // Build Avro header (logical_date as INT)
       val header = new GenericData.Record(headerSchema)
       header.put("event_timestamp", System.currentTimeMillis())
-      header.put("logical_date", logicalDateInt) // INT for Avro!
+      header.put("logical_date", logicalDateInt)
       header.put("event_type", eventType)
       header.put("tenant_id", tenantId)
       header.put("entity_id", customerId)
@@ -114,12 +111,8 @@ object AvroEventProducerWithPartitionedFolder {
       val wrapperBytes = serialize(wrapperSchema, wrapper)
 
       (
-        partitionId, tenantId, customerId, logicalDateInt,  // For Avro schema (int)
-        eventType,
-        eventType, // can remove this duplicity if you want
-        payloadBytes,
-        wrapperBytes,
-        logicalDateStr  // For partition naming
+        partitionId, tenantId, customerId, logicalDateInt, eventType,
+        payloadBytes, wrapperBytes, logicalDateStr   // logical_date string at the end, for partition folder
       )
     }
 
@@ -138,7 +131,6 @@ object AvroEventProducerWithPartitionedFolder {
     val newEvents = spark.sparkContext.parallelize(1 to nNewCustomers, numSlices = 32).flatMap { _ =>
       val partitionId = random.nextInt(8).toString
       val newCustomerId = f"${partitionId}_9${random.nextInt(999999)}%06d"
-      // 5 events per new customer: 1 NAME, 2 ADDRESS, 2 IDENTIFICATION
       Seq(
         buildEvent(newCustomerId, "NAME", partitionId, isNew = true),
         buildEvent(newCustomerId, "ADDRESS", partitionId, isNew = true),
@@ -148,27 +140,26 @@ object AvroEventProducerWithPartitionedFolder {
       )
     }
 
-    // Create DataFrame schema
+    // DataFrame schema: one string "logical_date" for partition as required
     val eventSchema = StructType(Seq(
       StructField("partition_id", StringType),
       StructField("tenant_id", IntegerType),
       StructField("customer_id", StringType),
-      StructField("logical_date", IntegerType),   // INT for Avro!
+      StructField("logical_date_int", IntegerType), // Avro INT, not used for partitioning
       StructField("event_type", StringType),
-      StructField("event_type2", StringType),
       StructField("payload_bytes", BinaryType),
       StructField("wrapper_bytes", BinaryType),
-      StructField("logical_date_str", StringType) // String for partitioning!
+      StructField("logical_date", StringType)       // <-- partition column name!
     ))
 
     val modifiedDF = spark.createDataFrame(modifiedEvents.map(Row.fromTuple), eventSchema)
-    val newDF = spark.createDataFrame(newEvents.map(Row.fromTuple), eventSchema)
+    val newDF     = spark.createDataFrame(newEvents.map(Row.fromTuple), eventSchema)
 
     // ---- Write Modified ----
     modifiedDF
       .write
       .mode(SaveMode.Overwrite)
-      .partitionBy("tenant_id", "partition_id", "logical_date_str") // Note: string partition
+      .partitionBy("tenant_id", "partition_id", "logical_date")
       .format("avro")
       .save(s"$baseOutputPath/modified")
 
@@ -176,11 +167,11 @@ object AvroEventProducerWithPartitionedFolder {
     newDF
       .write
       .mode(SaveMode.Overwrite)
-      .partitionBy("tenant_id", "partition_id", "logical_date_str") // Note: string partition
+      .partitionBy("tenant_id", "partition_id", "logical_date")
       .format("avro")
       .save(s"$baseOutputPath/new")
 
-    println(s"✅ Wrote Avro events: $baseOutputPath/modified and $baseOutputPath/new, partitioned folders with logical_date_str=$logicalDateStr")
+    println(s"✅ Wrote Avro events: $baseOutputPath/modified and $baseOutputPath/new, partitioned with logical_date=$logicalDateStr")
 
     spark.stop()
   }
