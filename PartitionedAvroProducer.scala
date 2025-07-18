@@ -3,9 +3,11 @@ package rastest
 import org.apache.avro.Schema
 import org.apache.avro.file.DataFileWriter
 import org.apache.avro.generic.{GenericData, GenericDatumWriter, GenericRecord}
+import org.apache.avro.io.EncoderFactory
+
 import org.apache.spark.sql.SparkSession
 
-import java.io.File
+import java.io.{ByteArrayOutputStream, File}
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.io.Source
@@ -82,9 +84,20 @@ object FileBasedAvroEventProducer {
           (idSchema, rec)
       }
 
+      // Serialize payload record to bytes because wrapperSchema expects bytes
+      val payloadBytes = {
+        val out = new ByteArrayOutputStream()
+        val writer = new GenericDatumWriter[GenericRecord](payloadSchema)
+        val encoder = EncoderFactory.get().binaryEncoder(out, null)
+        writer.write(payloadRecord, encoder)
+        encoder.flush()
+        out.close()
+        java.nio.ByteBuffer.wrap(out.toByteArray)
+      }
+
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
-      wrapper.put("payload", payloadRecord) // Directly put GenericRecord (not ByteBuffer)
+      wrapper.put("payload", payloadBytes)
 
       wrapper
     }
@@ -101,7 +114,7 @@ object FileBasedAvroEventProducer {
       dataFileWriter.close()
     }
 
-    // Existing customers (4M)
+    // Existing customers (some subset for example, increase as needed)
     val existingEvents = spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
     existingEvents.mapPartitionsWithIndex { case (partitionId, part) =>
       val ids = broadcastCustomerIds.value
@@ -115,7 +128,7 @@ object FileBasedAvroEventProducer {
       Iterator.empty
     }.count()
 
-    // New customers (500K × 5 events)
+    // New customers (example smaller count)
     val newCustomers = spark.sparkContext.parallelize(1 to 800, numSlices = 32)
     newCustomers.mapPartitionsWithIndex { case (partitionId, part) =>
       val buffer = part.flatMap { _ =>
