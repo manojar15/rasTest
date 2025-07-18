@@ -1,519 +1,196 @@
-C:\Users\E5655076\.jdks\corretto-11.0.27\bin\java.exe -javaagent:C:\Soft\IntelliJ\lib\idea_rt.jar=64348 -Dfile.encoding=UTF-8 -classpath C:\Users\E5655076\RAS_RPT\obrandrastest\target\scala-2.13\classes;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\scala-lang\scala-library\2.13.12\scala-library-2.13.12.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-core_2.13\3.5.0\spark-core_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-sql_2.13\3.5.0\spark-sql_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-streaming_2.13\3.5.0\spark-streaming_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-sql-kafka-0-10_2.13\3.5.0\spark-sql-kafka-0-10_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-avro_2.13\3.5.0\spark-avro_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\scala-lang\modules\scala-parallel-collections_2.13\1.0.4\scala-parallel-collections_2.13-1.0.4.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\avro\avro\1.11.2\avro-1.11.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\avro\avro-mapred\1.11.2\avro-mapred-1.11.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\twitter\chill_2.13\0.10.0\chill_2.13-0.10.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\twitter\chill-java\0.10.0\chill-java-0.10.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\xbean\xbean-asm9-shaded\4.23\xbean-asm9-shaded-4.23.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\hadoop\hadoop-client-api\3.3.4\hadoop-client-api-3.3.4.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\hadoop\hadoop-client-runtime\3.3.4\hadoop-client-runtime-3.3.4.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-launcher_2.13\3.5.0\spark-launcher_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-kvstore_2.13\3.5.0\spark-kvstore_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-network-common_2.13\3.5.0\spark-network-common_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-network-shuffle_2.13\3.5.0\spark-network-shuffle_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-unsafe_2.13\3.5.0\spark-unsafe_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-common-utils_2.13\3.5.0\spark-common-utils_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\javax\activation\activation\1.1.1\activation-1.1.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\curator\curator-recipes\2.13.0\curator-recipes-2.13.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\zookeeper\zookeeper\3.6.3\zookeeper-3.6.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\jakarta\servlet\jakarta.servlet-api\4.0.3\jakarta.servlet-api-4.0.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\commons-codec\commons-codec\1.16.0\commons-codec-1.16.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-compress\1.23.0\commons-compress-1.23.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-lang3\3.12.0\commons-lang3-3.12.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-math3\3.6.1\commons-math3-3.6.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-text\1.10.0\commons-text-1.10.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\commons-io\commons-io\2.13.0\commons-io-2.13.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-collections4\4.4\commons-collections4-4.4.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\ning\compress-lzf\1.1.2\compress-lzf-1.1.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\xerial\snappy\snappy-java\1.1.10.3\snappy-java-1.1.10.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\lz4\lz4-java\1.8.0\lz4-java-1.8.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\github\luben\zstd-jni\1.5.5-4\zstd-jni-1.5.5-4.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\roaringbitmap\RoaringBitmap\0.9.45\RoaringBitmap-0.9.45.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\scala-lang\modules\scala-xml_2.13\2.1.0\scala-xml_2.13-2.1.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\scala-lang\scala-reflect\2.13.12\scala-reflect-2.13.12.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\json4s\json4s-jackson_2.13\3.7.0-M11\json4s-jackson_2.13-3.7.0-M11.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\jersey\core\jersey-client\2.40\jersey-client-2.40.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\jersey\core\jersey-common\2.40\jersey-common-2.40.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\jersey\core\jersey-server\2.40\jersey-server-2.40.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\jersey\containers\jersey-container-servlet\2.40\jersey-container-servlet-2.40.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\jersey\containers\jersey-container-servlet-core\2.40\jersey-container-servlet-core-2.40.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\jersey\inject\jersey-hk2\2.40\jersey-hk2-2.40.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-all\4.1.96.Final\netty-all-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-native-epoll\4.1.96.Final\netty-transport-native-epoll-4.1.96.Final-linux-x86_64.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-native-epoll\4.1.96.Final\netty-transport-native-epoll-4.1.96.Final-linux-aarch_64.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-native-kqueue\4.1.96.Final\netty-transport-native-kqueue-4.1.96.Final-osx-aarch_64.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-native-kqueue\4.1.96.Final\netty-transport-native-kqueue-4.1.96.Final-osx-x86_64.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\clearspring\analytics\stream\2.9.6\stream-2.9.6.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\dropwizard\metrics\metrics-core\4.2.19\metrics-core-4.2.19.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\dropwizard\metrics\metrics-jvm\4.2.19\metrics-jvm-4.2.19.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\dropwizard\metrics\metrics-json\4.2.19\metrics-json-4.2.19.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\dropwizard\metrics\metrics-graphite\4.2.19\metrics-graphite-4.2.19.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\dropwizard\metrics\metrics-jmx\4.2.19\metrics-jmx-4.2.19.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\fasterxml\jackson\core\jackson-databind\2.15.2\jackson-databind-2.15.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\fasterxml\jackson\module\jackson-module-scala_2.13\2.15.2\jackson-module-scala_2.13-2.15.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\ivy\ivy\2.5.1\ivy-2.5.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\oro\oro\2.0.8\oro-2.0.8.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\net\razorvine\pickle\1.3\pickle-1.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\net\sf\py4j\py4j\0.10.9.7\py4j-0.10.9.7.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-tags_2.13\3.5.0\spark-tags_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-crypto\1.1.0\commons-crypto-1.1.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\rocksdb\rocksdbjni\8.3.2\rocksdbjni-8.3.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\univocity\univocity-parsers\2.9.1\univocity-parsers-2.9.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-sketch_2.13\3.5.0\spark-sketch_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-catalyst_2.13\3.5.0\spark-catalyst_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\orc\orc-core\1.9.1\orc-core-1.9.1-shaded-protobuf.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\orc\orc-mapreduce\1.9.1\orc-mapreduce-1.9.1-shaded-protobuf.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\hive\hive-storage-api\2.8.1\hive-storage-api-2.8.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\parquet\parquet-column\1.13.1\parquet-column-1.13.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\parquet\parquet-hadoop\1.13.1\parquet-hadoop-1.13.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-token-provider-kafka-0-10_2.13\3.5.0\spark-token-provider-kafka-0-10_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\kafka\kafka-clients\3.4.1\kafka-clients-3.4.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\commons\commons-pool2\2.11.1\commons-pool2-2.11.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\tukaani\xz\1.9\xz-1.9.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\fasterxml\jackson\core\jackson-core\2.15.2\jackson-core-2.15.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\slf4j\slf4j-api\2.0.7\slf4j-api-2.0.7.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\avro\avro-ipc\1.11.2\avro-ipc-1.11.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\esotericsoftware\kryo-shaded\4.0.2\kryo-shaded-4.0.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\commons-logging\commons-logging\1.1.3\commons-logging-1.1.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\fusesource\leveldbjni\leveldbjni-all\1.8\leveldbjni-all-1.8.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\fasterxml\jackson\core\jackson-annotations\2.15.2\jackson-annotations-2.15.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\google\crypto\tink\tink\1.9.0\tink-1.9.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\slf4j\jul-to-slf4j\2.0.7\jul-to-slf4j-2.0.7.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\slf4j\jcl-over-slf4j\2.0.7\jcl-over-slf4j-2.0.7.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\logging\log4j\log4j-slf4j2-impl\2.20.0\log4j-slf4j2-impl-2.20.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\logging\log4j\log4j-api\2.20.0\log4j-api-2.20.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\logging\log4j\log4j-core\2.20.0\log4j-core-2.20.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\logging\log4j\log4j-1.2-api\2.20.0\log4j-1.2-api-2.20.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\curator\curator-framework\2.13.0\curator-framework-2.13.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\zookeeper\zookeeper-jute\3.6.3\zookeeper-jute-3.6.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\yetus\audience-annotations\0.13.0\audience-annotations-0.13.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\roaringbitmap\shims\0.9.45\shims-0.9.45.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\json4s\json4s-core_2.13\3.7.0-M11\json4s-core_2.13-3.7.0-M11.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\jakarta\ws\rs\jakarta.ws.rs-api\2.1.6\jakarta.ws.rs-api-2.1.6.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\hk2\external\jakarta.inject\2.6.1\jakarta.inject-2.6.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\jakarta\annotation\jakarta.annotation-api\1.3.5\jakarta.annotation-api-1.3.5.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\hk2\osgi-resource-locator\1.0.3\osgi-resource-locator-1.0.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\jakarta\validation\jakarta.validation-api\2.0.2\jakarta.validation-api-2.0.2.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\hk2\hk2-locator\2.6.1\hk2-locator-2.6.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\javassist\javassist\3.29.2-GA\javassist-3.29.2-GA.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-buffer\4.1.96.Final\netty-buffer-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-codec\4.1.96.Final\netty-codec-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-codec-http\4.1.96.Final\netty-codec-http-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-codec-http2\4.1.96.Final\netty-codec-http2-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-codec-socks\4.1.96.Final\netty-codec-socks-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-common\4.1.96.Final\netty-common-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-handler\4.1.96.Final\netty-handler-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-native-unix-common\4.1.96.Final\netty-transport-native-unix-common-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-handler-proxy\4.1.96.Final\netty-handler-proxy-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-resolver\4.1.96.Final\netty-resolver-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport\4.1.96.Final\netty-transport-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-classes-epoll\4.1.96.Final\netty-transport-classes-epoll-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-classes-kqueue\4.1.96.Final\netty-transport-classes-kqueue-4.1.96.Final.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\thoughtworks\paranamer\paranamer\2.8\paranamer-2.8.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\spark\spark-sql-api_2.13\3.5.0\spark-sql-api_2.13-3.5.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\codehaus\janino\janino\3.1.9\janino-3.1.9.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\codehaus\janino\commons-compiler\3.1.9\commons-compiler-3.1.9.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\datasketches\datasketches-java\3.3.0\datasketches-java-3.3.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\orc\orc-shims\1.9.1\orc-shims-1.9.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\airlift\aircompressor\0.25\aircompressor-0.25.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\jetbrains\annotations\17.0.0\annotations-17.0.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\threeten\threeten-extra\1.7.1\threeten-extra-1.7.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\parquet\parquet-common\1.13.1\parquet-common-1.13.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\parquet\parquet-encoding\1.13.1\parquet-encoding-1.13.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\parquet\parquet-format-structures\1.13.1\parquet-format-structures-1.13.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\parquet\parquet-jackson\1.13.1\parquet-jackson-1.13.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\esotericsoftware\minlog\1.3.0\minlog-1.3.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\objenesis\objenesis\2.5.1\objenesis-2.5.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\google\protobuf\protobuf-java\3.19.6\protobuf-java-3.19.6.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\joda-time\joda-time\2.12.5\joda-time-2.12.5.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\curator\curator-client\2.13.0\curator-client-2.13.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\json4s\json4s-ast_2.13\3.7.0-M11\json4s-ast_2.13-3.7.0-M11.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\json4s\json4s-scalap_2.13\3.7.0-M11\json4s-scalap_2.13-3.7.0-M11.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\hk2\external\aopalliance-repackaged\2.6.1\aopalliance-repackaged-2.6.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\hk2\hk2-api\2.6.1\hk2-api-2.6.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\glassfish\hk2\hk2-utils\2.6.1\hk2-utils-2.6.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\scala-lang\modules\scala-parser-combinators_2.13\2.3.0\scala-parser-combinators_2.13-2.3.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\antlr\antlr4-runtime\4.9.3\antlr4-runtime-4.9.3.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\arrow\arrow-vector\12.0.1\arrow-vector-12.0.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\arrow\arrow-memory-netty\12.0.1\arrow-memory-netty-12.0.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\datasketches\datasketches-memory\2.1.0\datasketches-memory-2.1.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\google\guava\guava\16.0.1\guava-16.0.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\arrow\arrow-format\12.0.1\arrow-format-12.0.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\org\apache\arrow\arrow-memory-core\12.0.1\arrow-memory-core-12.0.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\fasterxml\jackson\datatype\jackson-datatype-jsr310\2.15.1\jackson-datatype-jsr310-2.15.1.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\google\flatbuffers\flatbuffers-java\1.12.0\flatbuffers-java-1.12.0.jar;C:\Users\E5655076\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\io\netty\netty-transport-native-epoll\4.1.96.Final\netty-transport-native-epoll-4.1.96.Final.jar rastest.PartitionedAvroFileEventConsumer
-Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
-25/07/18 17:47:37 INFO SparkContext: Running Spark version 3.5.0
-25/07/18 17:47:37 INFO SparkContext: OS info Windows 11, 10.0, amd64
-25/07/18 17:47:37 INFO SparkContext: Java version 11.0.27
-25/07/18 17:47:37 INFO ResourceUtils: ==============================================================
-25/07/18 17:47:37 INFO ResourceUtils: No custom resources configured for spark.driver.
-25/07/18 17:47:37 INFO ResourceUtils: ==============================================================
-25/07/18 17:47:37 INFO SparkContext: Submitted application: Partitioned Avro File Event Consumer
-25/07/18 17:47:37 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(cores -> name: cores, amount: 1, script: , vendor: , memory -> name: memory, amount: 1024, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-25/07/18 17:47:37 INFO ResourceProfile: Limiting resource is cpu
-25/07/18 17:47:37 INFO ResourceProfileManager: Added ResourceProfile id: 0
-25/07/18 17:47:37 INFO SecurityManager: Changing view acls to: e5655076
-25/07/18 17:47:37 INFO SecurityManager: Changing modify acls to: e5655076
-25/07/18 17:47:37 INFO SecurityManager: Changing view acls groups to: 
-25/07/18 17:47:37 INFO SecurityManager: Changing modify acls groups to: 
-25/07/18 17:47:37 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: e5655076; groups with view permissions: EMPTY; users with modify permissions: e5655076; groups with modify permissions: EMPTY
-25/07/18 17:47:38 INFO Utils: Successfully started service 'sparkDriver' on port 64394.
-25/07/18 17:47:38 INFO SparkEnv: Registering MapOutputTracker
-WARNING: An illegal reflective access operation has occurred
-WARNING: Illegal reflective access by org.apache.spark.unsafe.Platform (file:/C:/Users/E5655076/AppData/Local/Coursier/cache/v1/https/repo1.maven.org/maven2/org/apache/spark/spark-unsafe_2.13/3.5.0/spark-unsafe_2.13-3.5.0.jar) to constructor java.nio.DirectByteBuffer(long,int)
-WARNING: Please consider reporting this to the maintainers of org.apache.spark.unsafe.Platform
-WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
-WARNING: All illegal access operations will be denied in a future release
-25/07/18 17:47:38 INFO SparkEnv: Registering BlockManagerMaster
-25/07/18 17:47:38 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
-25/07/18 17:47:38 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
-25/07/18 17:47:38 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
-25/07/18 17:47:38 INFO DiskBlockManager: Created local directory at C:\Users\E5655076\AppData\Local\Temp\1\blockmgr-fa0ed6fd-c717-4946-b872-b63952bf5ad6
-25/07/18 17:47:38 INFO MemoryStore: MemoryStore started with capacity 2.2 GiB
-25/07/18 17:47:38 INFO SparkEnv: Registering OutputCommitCoordinator
-25/07/18 17:47:38 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
-25/07/18 17:47:38 INFO Utils: Successfully started service 'SparkUI' on port 4040.
-25/07/18 17:47:38 INFO Executor: Starting executor ID driver on host BLR1-LTCL68YD3.FNFIS.com
-25/07/18 17:47:38 INFO Executor: OS info Windows 11, 10.0, amd64
-25/07/18 17:47:38 INFO Executor: Java version 11.0.27
-25/07/18 17:47:38 INFO Executor: Starting executor with user classpath (userClassPathFirst = false): ''
-25/07/18 17:47:38 INFO Executor: Created or updated repl class loader org.apache.spark.util.MutableURLClassLoader@5ceecfee for default.
-25/07/18 17:47:38 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 64437.
-25/07/18 17:47:38 INFO NettyBlockTransferService: Server created on BLR1-LTCL68YD3.FNFIS.com:64437
-25/07/18 17:47:38 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
-25/07/18 17:47:38 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, BLR1-LTCL68YD3.FNFIS.com, 64437, None)
-25/07/18 17:47:38 INFO BlockManagerMasterEndpoint: Registering block manager BLR1-LTCL68YD3.FNFIS.com:64437 with 2.2 GiB RAM, BlockManagerId(driver, BLR1-LTCL68YD3.FNFIS.com, 64437, None)
-25/07/18 17:47:38 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, BLR1-LTCL68YD3.FNFIS.com, 64437, None)
-25/07/18 17:47:38 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, BLR1-LTCL68YD3.FNFIS.com, 64437, None)
-25/07/18 17:47:39 INFO SharedState: Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir.
-25/07/18 17:47:39 INFO SharedState: Warehouse path is 'file:/C:/Users/E5655076/RAS_RPT/obrandrastest/spark-warehouse'.
-25/07/18 17:47:40 INFO HadoopFSUtils: Listing leaf files and directories in parallel under 96 paths. The first several paths are: file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_0.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_1.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_10.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_11.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_12.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_13.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_14.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_15.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_16.avro, file:/C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03/existing/events_partition_17.avro.
-25/07/18 17:47:40 INFO SparkContext: Starting job: load at PartitionedAvroConsumer.scala:30
-25/07/18 17:47:40 INFO DAGScheduler: Got job 0 (load at PartitionedAvroConsumer.scala:30) with 96 output partitions
-25/07/18 17:47:40 INFO DAGScheduler: Final stage: ResultStage 0 (load at PartitionedAvroConsumer.scala:30)
-25/07/18 17:47:40 INFO DAGScheduler: Parents of final stage: List()
-25/07/18 17:47:40 INFO DAGScheduler: Missing parents: List()
-25/07/18 17:47:40 INFO DAGScheduler: Submitting ResultStage 0 (MapPartitionsRDD[1] at load at PartitionedAvroConsumer.scala:30), which has no missing parents
-25/07/18 17:47:40 INFO MemoryStore: Block broadcast_0 stored as values in memory (estimated size 102.2 KiB, free 2.2 GiB)
-25/07/18 17:47:40 INFO MemoryStore: Block broadcast_0_piece0 stored as bytes in memory (estimated size 36.7 KiB, free 2.2 GiB)
-25/07/18 17:47:40 INFO BlockManagerInfo: Added broadcast_0_piece0 in memory on BLR1-LTCL68YD3.FNFIS.com:64437 (size: 36.7 KiB, free: 2.2 GiB)
-25/07/18 17:47:40 INFO SparkContext: Created broadcast 0 from broadcast at DAGScheduler.scala:1580
-25/07/18 17:47:40 INFO DAGScheduler: Submitting 96 missing tasks from ResultStage 0 (MapPartitionsRDD[1] at load at PartitionedAvroConsumer.scala:30) (first 15 tasks are for partitions Vector(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14))
-25/07/18 17:47:40 INFO TaskSchedulerImpl: Adding task set 0.0 with 96 tasks resource profile 0
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 0.0 in stage 0.0 (TID 0) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 0, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 1.0 in stage 0.0 (TID 1) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 1, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 2.0 in stage 0.0 (TID 2) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 2, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 3.0 in stage 0.0 (TID 3) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 3, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 4.0 in stage 0.0 (TID 4) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 4, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 5.0 in stage 0.0 (TID 5) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 5, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 6.0 in stage 0.0 (TID 6) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 6, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:40 INFO TaskSetManager: Starting task 7.0 in stage 0.0 (TID 7) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 7, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:40 INFO Executor: Running task 1.0 in stage 0.0 (TID 1)
-25/07/18 17:47:40 INFO Executor: Running task 0.0 in stage 0.0 (TID 0)
-25/07/18 17:47:40 INFO Executor: Running task 6.0 in stage 0.0 (TID 6)
-25/07/18 17:47:40 INFO Executor: Running task 5.0 in stage 0.0 (TID 5)
-25/07/18 17:47:40 INFO Executor: Running task 2.0 in stage 0.0 (TID 2)
-25/07/18 17:47:40 INFO Executor: Running task 4.0 in stage 0.0 (TID 4)
-25/07/18 17:47:40 INFO Executor: Running task 7.0 in stage 0.0 (TID 7)
-25/07/18 17:47:40 INFO Executor: Running task 3.0 in stage 0.0 (TID 3)
-25/07/18 17:47:41 INFO Executor: Finished task 1.0 in stage 0.0 (TID 1). 2879 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 5.0 in stage 0.0 (TID 5). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 3.0 in stage 0.0 (TID 3). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 4.0 in stage 0.0 (TID 4). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 0.0 in stage 0.0 (TID 0). 2922 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 6.0 in stage 0.0 (TID 6). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 7.0 in stage 0.0 (TID 7). 2881 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 2.0 in stage 0.0 (TID 2). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 8.0 in stage 0.0 (TID 8) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 8, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 8.0 in stage 0.0 (TID 8)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 9.0 in stage 0.0 (TID 9) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 9, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 9.0 in stage 0.0 (TID 9)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 10.0 in stage 0.0 (TID 10) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 10, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 10.0 in stage 0.0 (TID 10)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 11.0 in stage 0.0 (TID 11) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 11, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 11.0 in stage 0.0 (TID 11)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 12.0 in stage 0.0 (TID 12) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 12, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 13.0 in stage 0.0 (TID 13) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 13, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 14.0 in stage 0.0 (TID 14) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 14, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 13.0 in stage 0.0 (TID 13)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 15.0 in stage 0.0 (TID 15) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 15, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 14.0 in stage 0.0 (TID 14)
-25/07/18 17:47:41 INFO Executor: Running task 15.0 in stage 0.0 (TID 15)
-25/07/18 17:47:41 INFO Executor: Running task 12.0 in stage 0.0 (TID 12)
-25/07/18 17:47:41 INFO Executor: Finished task 11.0 in stage 0.0 (TID 11). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 13.0 in stage 0.0 (TID 13). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 16.0 in stage 0.0 (TID 16) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 16, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 8.0 in stage 0.0 (TID 8). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 16.0 in stage 0.0 (TID 16)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 17.0 in stage 0.0 (TID 17) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 17, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 15.0 in stage 0.0 (TID 15). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 18.0 in stage 0.0 (TID 18) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 18, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 17.0 in stage 0.0 (TID 17)
-25/07/18 17:47:41 INFO Executor: Running task 18.0 in stage 0.0 (TID 18)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 19.0 in stage 0.0 (TID 19) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 19, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 19.0 in stage 0.0 (TID 19)
-25/07/18 17:47:41 INFO Executor: Finished task 14.0 in stage 0.0 (TID 14). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 20.0 in stage 0.0 (TID 20) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 20, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 20.0 in stage 0.0 (TID 20)
-25/07/18 17:47:41 INFO Executor: Finished task 9.0 in stage 0.0 (TID 9). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 18.0 in stage 0.0 (TID 18). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 19.0 in stage 0.0 (TID 19). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 17.0 in stage 0.0 (TID 17). 2881 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 20.0 in stage 0.0 (TID 20). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 10.0 in stage 0.0 (TID 10). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 21.0 in stage 0.0 (TID 21) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 21, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 22.0 in stage 0.0 (TID 22) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 22, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 21.0 in stage 0.0 (TID 21)
-25/07/18 17:47:41 INFO Executor: Running task 22.0 in stage 0.0 (TID 22)
-25/07/18 17:47:41 INFO Executor: Finished task 12.0 in stage 0.0 (TID 12). 2836 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 23.0 in stage 0.0 (TID 23) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 23, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 23.0 in stage 0.0 (TID 23)
-25/07/18 17:47:41 INFO Executor: Finished task 16.0 in stage 0.0 (TID 16). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 24.0 in stage 0.0 (TID 24) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 24, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 24.0 in stage 0.0 (TID 24)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 25.0 in stage 0.0 (TID 25) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 25, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 25.0 in stage 0.0 (TID 25)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 26.0 in stage 0.0 (TID 26) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 26, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 27.0 in stage 0.0 (TID 27) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 27, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 27.0 in stage 0.0 (TID 27)
-25/07/18 17:47:41 INFO Executor: Finished task 23.0 in stage 0.0 (TID 23). 2793 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 26.0 in stage 0.0 (TID 26)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 28.0 in stage 0.0 (TID 28) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 28, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 28.0 in stage 0.0 (TID 28)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 29.0 in stage 0.0 (TID 29) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 29, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 29.0 in stage 0.0 (TID 29)
-25/07/18 17:47:41 INFO Executor: Finished task 27.0 in stage 0.0 (TID 27). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 21.0 in stage 0.0 (TID 21). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 25.0 in stage 0.0 (TID 25). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 26.0 in stage 0.0 (TID 26). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 4.0 in stage 0.0 (TID 4) in 367 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (1/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 3.0 in stage 0.0 (TID 3) in 376 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (2/96)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 30.0 in stage 0.0 (TID 30) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 30, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 30.0 in stage 0.0 (TID 30)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 5.0 in stage 0.0 (TID 5) in 377 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (3/96)
-25/07/18 17:47:41 INFO Executor: Finished task 29.0 in stage 0.0 (TID 29). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 31.0 in stage 0.0 (TID 31) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 31, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 22.0 in stage 0.0 (TID 22). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 0.0 in stage 0.0 (TID 0) in 401 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (4/96)
-25/07/18 17:47:41 INFO Executor: Running task 31.0 in stage 0.0 (TID 31)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 1.0 in stage 0.0 (TID 1) in 385 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (5/96)
-25/07/18 17:47:41 INFO Executor: Finished task 28.0 in stage 0.0 (TID 28). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 32.0 in stage 0.0 (TID 32) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 32, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 32.0 in stage 0.0 (TID 32)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 33.0 in stage 0.0 (TID 33) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 33, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 33.0 in stage 0.0 (TID 33)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 7.0 in stage 0.0 (TID 7) in 386 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (6/96)
-25/07/18 17:47:41 INFO Executor: Finished task 24.0 in stage 0.0 (TID 24). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 11.0 in stage 0.0 (TID 11) in 112 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (7/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 8.0 in stage 0.0 (TID 8) in 117 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (8/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 15.0 in stage 0.0 (TID 15) in 110 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (9/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 14.0 in stage 0.0 (TID 14) in 111 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (10/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 9.0 in stage 0.0 (TID 9) in 116 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (11/96)
-25/07/18 17:47:41 INFO Executor: Finished task 30.0 in stage 0.0 (TID 30). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 6.0 in stage 0.0 (TID 6) in 388 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (12/96)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 34.0 in stage 0.0 (TID 34) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 34, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 34.0 in stage 0.0 (TID 34)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 35.0 in stage 0.0 (TID 35) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 35, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 35.0 in stage 0.0 (TID 35)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 36.0 in stage 0.0 (TID 36) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 36, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 36.0 in stage 0.0 (TID 36)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 2.0 in stage 0.0 (TID 2) in 394 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (13/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 13.0 in stage 0.0 (TID 13) in 116 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (14/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 19.0 in stage 0.0 (TID 19) in 94 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (15/96)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 37.0 in stage 0.0 (TID 37) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 37, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 37.0 in stage 0.0 (TID 37)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 38.0 in stage 0.0 (TID 38) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 38, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 31.0 in stage 0.0 (TID 31). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 38.0 in stage 0.0 (TID 38)
-25/07/18 17:47:41 INFO Executor: Finished task 33.0 in stage 0.0 (TID 33). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 39.0 in stage 0.0 (TID 39) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 39, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 20.0 in stage 0.0 (TID 20) in 97 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (16/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 12.0 in stage 0.0 (TID 12) in 127 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (17/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 16.0 in stage 0.0 (TID 16) in 107 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (18/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 23.0 in stage 0.0 (TID 23) in 79 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (19/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 21.0 in stage 0.0 (TID 21) in 80 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (20/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 27.0 in stage 0.0 (TID 27) in 76 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (21/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 25.0 in stage 0.0 (TID 25) in 77 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (22/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 26.0 in stage 0.0 (TID 26) in 76 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (23/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 29.0 in stage 0.0 (TID 29) in 42 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (24/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 22.0 in stage 0.0 (TID 22) in 81 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (25/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 28.0 in stage 0.0 (TID 28) in 45 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (26/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 24.0 in stage 0.0 (TID 24) in 79 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (27/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 17.0 in stage 0.0 (TID 17) in 109 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (28/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 30.0 in stage 0.0 (TID 30) in 32 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (29/96)
-25/07/18 17:47:41 INFO Executor: Running task 39.0 in stage 0.0 (TID 39)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 40.0 in stage 0.0 (TID 40) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 40, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 31.0 in stage 0.0 (TID 31) in 30 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (30/96)
-25/07/18 17:47:41 INFO Executor: Running task 40.0 in stage 0.0 (TID 40)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 33.0 in stage 0.0 (TID 33) in 25 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (31/96)
-25/07/18 17:47:41 INFO Executor: Finished task 32.0 in stage 0.0 (TID 32). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 18.0 in stage 0.0 (TID 18) in 113 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (32/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 10.0 in stage 0.0 (TID 10) in 138 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (33/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 32.0 in stage 0.0 (TID 32) in 32 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (34/96)
-25/07/18 17:47:41 INFO Executor: Finished task 37.0 in stage 0.0 (TID 37). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 41.0 in stage 0.0 (TID 41) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 41, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 34.0 in stage 0.0 (TID 34). 2836 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 41.0 in stage 0.0 (TID 41)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 42.0 in stage 0.0 (TID 42) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 42, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 42.0 in stage 0.0 (TID 42)
-25/07/18 17:47:41 INFO Executor: Finished task 40.0 in stage 0.0 (TID 40). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 37.0 in stage 0.0 (TID 37) in 26 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (35/96)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 43.0 in stage 0.0 (TID 43) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 43, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 43.0 in stage 0.0 (TID 43)
-25/07/18 17:47:41 INFO Executor: Finished task 39.0 in stage 0.0 (TID 39). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 34.0 in stage 0.0 (TID 34) in 35 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (36/96)
-25/07/18 17:47:41 INFO Executor: Finished task 38.0 in stage 0.0 (TID 38). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 44.0 in stage 0.0 (TID 44) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 44, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 45.0 in stage 0.0 (TID 45) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 45, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 45.0 in stage 0.0 (TID 45)
-25/07/18 17:47:41 INFO Executor: Running task 44.0 in stage 0.0 (TID 44)
-25/07/18 17:47:41 INFO Executor: Finished task 41.0 in stage 0.0 (TID 41). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 35.0 in stage 0.0 (TID 35). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 46.0 in stage 0.0 (TID 46) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 46, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 46.0 in stage 0.0 (TID 46)
-25/07/18 17:47:41 INFO Executor: Finished task 36.0 in stage 0.0 (TID 36). 2924 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 43.0 in stage 0.0 (TID 43). 2881 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 47.0 in stage 0.0 (TID 47) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 47, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 47.0 in stage 0.0 (TID 47)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 41.0 in stage 0.0 (TID 41) in 40 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (37/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 40.0 in stage 0.0 (TID 40) in 51 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (38/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 38.0 in stage 0.0 (TID 38) in 62 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (39/96)
-25/07/18 17:47:41 INFO Executor: Finished task 45.0 in stage 0.0 (TID 45). 2879 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 39.0 in stage 0.0 (TID 39) in 57 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (40/96)
-25/07/18 17:47:41 INFO Executor: Finished task 44.0 in stage 0.0 (TID 44). 2881 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 48.0 in stage 0.0 (TID 48) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 48, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 42.0 in stage 0.0 (TID 42). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 49.0 in stage 0.0 (TID 49) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 49, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 50.0 in stage 0.0 (TID 50) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 50, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 48.0 in stage 0.0 (TID 48)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 51.0 in stage 0.0 (TID 51) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 51, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 49.0 in stage 0.0 (TID 49)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 52.0 in stage 0.0 (TID 52) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 52, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 53.0 in stage 0.0 (TID 53) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 53, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 51.0 in stage 0.0 (TID 51)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 44.0 in stage 0.0 (TID 44) in 41 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (41/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 43.0 in stage 0.0 (TID 43) in 44 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (42/96)
-25/07/18 17:47:41 INFO Executor: Running task 53.0 in stage 0.0 (TID 53)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 36.0 in stage 0.0 (TID 36) in 78 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (43/96)
-25/07/18 17:47:41 INFO Executor: Running task 52.0 in stage 0.0 (TID 52)
-25/07/18 17:47:41 INFO Executor: Finished task 47.0 in stage 0.0 (TID 47). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 54.0 in stage 0.0 (TID 54) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 54, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 54.0 in stage 0.0 (TID 54)
-25/07/18 17:47:41 INFO Executor: Finished task 49.0 in stage 0.0 (TID 49). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 53.0 in stage 0.0 (TID 53). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 46.0 in stage 0.0 (TID 46). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 55.0 in stage 0.0 (TID 55) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 55, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 47.0 in stage 0.0 (TID 47) in 48 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (44/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 45.0 in stage 0.0 (TID 45) in 58 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (45/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 35.0 in stage 0.0 (TID 35) in 96 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (46/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 42.0 in stage 0.0 (TID 42) in 67 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (47/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 49.0 in stage 0.0 (TID 49) in 25 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (48/96)
-25/07/18 17:47:41 INFO Executor: Running task 55.0 in stage 0.0 (TID 55)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 56.0 in stage 0.0 (TID 56) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 56, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 56.0 in stage 0.0 (TID 56)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 57.0 in stage 0.0 (TID 57) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 57, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 57.0 in stage 0.0 (TID 57)
-25/07/18 17:47:41 INFO Executor: Finished task 54.0 in stage 0.0 (TID 54). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 52.0 in stage 0.0 (TID 52). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 58.0 in stage 0.0 (TID 58) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 58, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 59.0 in stage 0.0 (TID 59) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 59, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 54.0 in stage 0.0 (TID 54) in 23 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (49/96)
-25/07/18 17:47:41 INFO Executor: Running task 59.0 in stage 0.0 (TID 59)
-25/07/18 17:47:41 INFO Executor: Running task 58.0 in stage 0.0 (TID 58)
-25/07/18 17:47:41 INFO Executor: Finished task 51.0 in stage 0.0 (TID 51). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 55.0 in stage 0.0 (TID 55). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 53.0 in stage 0.0 (TID 53) in 35 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (50/96)
-25/07/18 17:47:41 INFO Executor: Running task 50.0 in stage 0.0 (TID 50)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 60.0 in stage 0.0 (TID 60) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 60, PROCESS_LOCAL, 7987 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 60.0 in stage 0.0 (TID 60)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 61.0 in stage 0.0 (TID 61) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 61, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 51.0 in stage 0.0 (TID 51) in 50 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (51/96)
-25/07/18 17:47:41 INFO Executor: Running task 61.0 in stage 0.0 (TID 61)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 46.0 in stage 0.0 (TID 46) in 76 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (52/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 55.0 in stage 0.0 (TID 55) in 30 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (53/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 52.0 in stage 0.0 (TID 52) in 50 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (54/96)
-25/07/18 17:47:41 INFO Executor: Finished task 57.0 in stage 0.0 (TID 57). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 62.0 in stage 0.0 (TID 62) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 62, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 57.0 in stage 0.0 (TID 57) in 31 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (55/96)
-25/07/18 17:47:41 INFO Executor: Running task 62.0 in stage 0.0 (TID 62)
-25/07/18 17:47:41 INFO Executor: Finished task 56.0 in stage 0.0 (TID 56). 2793 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 48.0 in stage 0.0 (TID 48). 2795 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 63.0 in stage 0.0 (TID 63) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 63, PROCESS_LOCAL, 7986 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 64.0 in stage 0.0 (TID 64) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 64, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 64.0 in stage 0.0 (TID 64)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 56.0 in stage 0.0 (TID 56) in 37 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (56/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 48.0 in stage 0.0 (TID 48) in 63 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (57/96)
-25/07/18 17:47:41 INFO Executor: Running task 63.0 in stage 0.0 (TID 63)
-25/07/18 17:47:41 INFO Executor: Finished task 58.0 in stage 0.0 (TID 58). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 65.0 in stage 0.0 (TID 65) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 65, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 65.0 in stage 0.0 (TID 65)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 58.0 in stage 0.0 (TID 58) in 34 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (58/96)
-25/07/18 17:47:41 INFO Executor: Finished task 62.0 in stage 0.0 (TID 62). 2793 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 66.0 in stage 0.0 (TID 66) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 66, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 62.0 in stage 0.0 (TID 62) in 29 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (59/96)
-25/07/18 17:47:41 INFO Executor: Running task 66.0 in stage 0.0 (TID 66)
-25/07/18 17:47:41 INFO Executor: Finished task 64.0 in stage 0.0 (TID 64). 2783 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 67.0 in stage 0.0 (TID 67) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 67, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 67.0 in stage 0.0 (TID 67)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 64.0 in stage 0.0 (TID 64) in 28 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (60/96)
-25/07/18 17:47:41 INFO Executor: Finished task 50.0 in stage 0.0 (TID 50). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 63.0 in stage 0.0 (TID 63). 2793 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 65.0 in stage 0.0 (TID 65). 2826 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 68.0 in stage 0.0 (TID 68) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 68, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 68.0 in stage 0.0 (TID 68)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 69.0 in stage 0.0 (TID 69) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 69, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 50.0 in stage 0.0 (TID 50) in 91 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (61/96)
-25/07/18 17:47:41 INFO Executor: Running task 69.0 in stage 0.0 (TID 69)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 63.0 in stage 0.0 (TID 63) in 31 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (62/96)
-25/07/18 17:47:41 INFO Executor: Finished task 60.0 in stage 0.0 (TID 60). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 70.0 in stage 0.0 (TID 70) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 70, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 71.0 in stage 0.0 (TID 71) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 71, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 71.0 in stage 0.0 (TID 71)
-25/07/18 17:47:41 INFO Executor: Finished task 59.0 in stage 0.0 (TID 59). 2838 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 70.0 in stage 0.0 (TID 70)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 65.0 in stage 0.0 (TID 65) in 32 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (63/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 60.0 in stage 0.0 (TID 60) in 46 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (64/96)
-25/07/18 17:47:41 INFO Executor: Finished task 68.0 in stage 0.0 (TID 68). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 69.0 in stage 0.0 (TID 69). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 72.0 in stage 0.0 (TID 72) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 72, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 70.0 in stage 0.0 (TID 70). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 73.0 in stage 0.0 (TID 73) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 73, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 71.0 in stage 0.0 (TID 71). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 66.0 in stage 0.0 (TID 66). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 72.0 in stage 0.0 (TID 72)
-25/07/18 17:47:41 INFO Executor: Running task 73.0 in stage 0.0 (TID 73)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 74.0 in stage 0.0 (TID 74) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 74, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 67.0 in stage 0.0 (TID 67). 2871 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Running task 74.0 in stage 0.0 (TID 74)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 75.0 in stage 0.0 (TID 75) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 75, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 75.0 in stage 0.0 (TID 75)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 76.0 in stage 0.0 (TID 76) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 76, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 76.0 in stage 0.0 (TID 76)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 77.0 in stage 0.0 (TID 77) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 77, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 77.0 in stage 0.0 (TID 77)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 78.0 in stage 0.0 (TID 78) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 78, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 78.0 in stage 0.0 (TID 78)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 68.0 in stage 0.0 (TID 68) in 34 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (65/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 69.0 in stage 0.0 (TID 69) in 34 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (66/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 59.0 in stage 0.0 (TID 59) in 93 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (67/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 70.0 in stage 0.0 (TID 70) in 33 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (68/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 67.0 in stage 0.0 (TID 67) in 37 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (69/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 66.0 in stage 0.0 (TID 66) in 39 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (70/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 71.0 in stage 0.0 (TID 71) in 32 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (71/96)
-25/07/18 17:47:41 INFO Executor: Finished task 61.0 in stage 0.0 (TID 61). 2836 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 79.0 in stage 0.0 (TID 79) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 79, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Finished task 75.0 in stage 0.0 (TID 75). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 61.0 in stage 0.0 (TID 61) in 91 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (72/96)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 80.0 in stage 0.0 (TID 80) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 80, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 80.0 in stage 0.0 (TID 80)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 75.0 in stage 0.0 (TID 75) in 24 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (73/96)
-25/07/18 17:47:41 INFO Executor: Running task 79.0 in stage 0.0 (TID 79)
-25/07/18 17:47:41 INFO Executor: Finished task 74.0 in stage 0.0 (TID 74). 2871 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 78.0 in stage 0.0 (TID 78). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 80.0 in stage 0.0 (TID 80). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 76.0 in stage 0.0 (TID 76). 2783 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 81.0 in stage 0.0 (TID 81) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 81, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 81.0 in stage 0.0 (TID 81)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 82.0 in stage 0.0 (TID 82) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 82, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 83.0 in stage 0.0 (TID 83) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 83, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 82.0 in stage 0.0 (TID 82)
-25/07/18 17:47:41 INFO Executor: Running task 83.0 in stage 0.0 (TID 83)
-25/07/18 17:47:41 INFO Executor: Finished task 79.0 in stage 0.0 (TID 79). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 84.0 in stage 0.0 (TID 84) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 84, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 85.0 in stage 0.0 (TID 85) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 85, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 84.0 in stage 0.0 (TID 84)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 80.0 in stage 0.0 (TID 80) in 26 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (74/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 79.0 in stage 0.0 (TID 79) in 31 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (75/96)
-25/07/18 17:47:41 INFO Executor: Running task 85.0 in stage 0.0 (TID 85)
-25/07/18 17:47:41 INFO Executor: Finished task 82.0 in stage 0.0 (TID 82). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 81.0 in stage 0.0 (TID 81). 2914 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 86.0 in stage 0.0 (TID 86) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 86, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 87.0 in stage 0.0 (TID 87) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 87, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 86.0 in stage 0.0 (TID 86)
-25/07/18 17:47:41 INFO Executor: Finished task 83.0 in stage 0.0 (TID 83). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 74.0 in stage 0.0 (TID 74) in 59 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (76/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 82.0 in stage 0.0 (TID 82) in 16 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (77/96)
-25/07/18 17:47:41 INFO Executor: Running task 87.0 in stage 0.0 (TID 87)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 88.0 in stage 0.0 (TID 88) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 88, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 88.0 in stage 0.0 (TID 88)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 78.0 in stage 0.0 (TID 78) in 58 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (78/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 76.0 in stage 0.0 (TID 76) in 59 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (79/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 83.0 in stage 0.0 (TID 83) in 29 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (80/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 81.0 in stage 0.0 (TID 81) in 30 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (81/96)
-25/07/18 17:47:41 INFO Executor: Finished task 85.0 in stage 0.0 (TID 85). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 89.0 in stage 0.0 (TID 89) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 89, PROCESS_LOCAL, 7982 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 89.0 in stage 0.0 (TID 89)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 85.0 in stage 0.0 (TID 85) in 25 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (82/96)
-25/07/18 17:47:41 INFO Executor: Finished task 86.0 in stage 0.0 (TID 86). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 84.0 in stage 0.0 (TID 84). 2871 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 90.0 in stage 0.0 (TID 90) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 90, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 91.0 in stage 0.0 (TID 91) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 91, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 91.0 in stage 0.0 (TID 91)
-25/07/18 17:47:41 INFO Executor: Finished task 88.0 in stage 0.0 (TID 88). 2785 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 92.0 in stage 0.0 (TID 92) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 92, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 92.0 in stage 0.0 (TID 92)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 84.0 in stage 0.0 (TID 84) in 32 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (83/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 86.0 in stage 0.0 (TID 86) in 25 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (84/96)
-25/07/18 17:47:41 INFO Executor: Running task 90.0 in stage 0.0 (TID 90)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 88.0 in stage 0.0 (TID 88) in 22 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (85/96)
-25/07/18 17:47:41 INFO Executor: Finished task 89.0 in stage 0.0 (TID 89). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 87.0 in stage 0.0 (TID 87). 2826 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 93.0 in stage 0.0 (TID 93) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 93, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO Executor: Running task 93.0 in stage 0.0 (TID 93)
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 94.0 in stage 0.0 (TID 94) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 94, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 89.0 in stage 0.0 (TID 89) in 12 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (86/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 87.0 in stage 0.0 (TID 87) in 30 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (87/96)
-25/07/18 17:47:41 INFO Executor: Running task 94.0 in stage 0.0 (TID 94)
-25/07/18 17:47:41 INFO Executor: Finished task 92.0 in stage 0.0 (TID 92). 2869 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Starting task 95.0 in stage 0.0 (TID 95) (BLR1-LTCL68YD3.FNFIS.com, executor driver, partition 95, PROCESS_LOCAL, 7981 bytes) 
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 92.0 in stage 0.0 (TID 92) in 26 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (88/96)
-25/07/18 17:47:41 INFO Executor: Running task 95.0 in stage 0.0 (TID 95)
-25/07/18 17:47:41 INFO Executor: Finished task 93.0 in stage 0.0 (TID 93). 2869 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 91.0 in stage 0.0 (TID 91). 2826 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 77.0 in stage 0.0 (TID 77). 2871 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 94.0 in stage 0.0 (TID 94). 2869 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 72.0 in stage 0.0 (TID 72). 2871 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 95.0 in stage 0.0 (TID 95). 2783 bytes result sent to driver
-25/07/18 17:47:41 INFO Executor: Finished task 73.0 in stage 0.0 (TID 73). 2828 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 91.0 in stage 0.0 (TID 91) in 40 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (89/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 93.0 in stage 0.0 (TID 93) in 34 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (90/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 94.0 in stage 0.0 (TID 94) in 34 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (91/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 72.0 in stage 0.0 (TID 72) in 132 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (92/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 73.0 in stage 0.0 (TID 73) in 132 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (93/96)
-25/07/18 17:47:41 INFO Executor: Finished task 90.0 in stage 0.0 (TID 90). 2869 bytes result sent to driver
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 90.0 in stage 0.0 (TID 90) in 46 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (94/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 77.0 in stage 0.0 (TID 77) in 118 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (95/96)
-25/07/18 17:47:41 INFO TaskSetManager: Finished task 95.0 in stage 0.0 (TID 95) in 22 ms on BLR1-LTCL68YD3.FNFIS.com (executor driver) (96/96)
-25/07/18 17:47:41 INFO DAGScheduler: ResultStage 0 (load at PartitionedAvroConsumer.scala:30) finished in 0.947 s
-25/07/18 17:47:41 INFO TaskSchedulerImpl: Removed TaskSet 0.0, whose tasks have all completed, from pool 
-25/07/18 17:47:41 INFO DAGScheduler: Job 0 is finished. Cancelling potential speculative or zombie tasks for this job
-25/07/18 17:47:41 INFO TaskSchedulerImpl: Killing all running tasks in stage 0: Stage finished
-25/07/18 17:47:41 INFO DAGScheduler: Job 0 finished: load at PartitionedAvroConsumer.scala:30, took 0.994758 s
-25/07/18 17:47:41 INFO InMemoryFileIndex: It took 1404 ms to list leaf files for 96 paths.
-Exception in thread "main" org.apache.spark.sql.AnalysisException: [DATATYPE_MISMATCH.UNEXPECTED_INPUT_TYPE] Cannot resolve "date_add(to_date(1970-01-01), logical_date_int)" due to data type mismatch: Parameter 2 requires the ("INT" or "SMALLINT" or "TINYINT") type, however "logical_date_int" has the type "DATE".; line 1 pos 0;
-'Project [header#0, payload#1, customer_id#4, event_type#10, logical_date_int#16, tenant_id#23, partition_id#31, event_timestamp#39L, date_format(date_add(to_date(1970-01-01, None, Some(Asia/Calcutta), false), logical_date_int#16), yyyy-MM-dd, Some(Asia/Calcutta)) AS logical_date#49]
-+- Project [header#0, payload#1, customer_id#4, event_type#10, logical_date_int#16, tenant_id#23, partition_id#31, header#0.event_timestamp AS event_timestamp#39L]
-   +- Project [header#0, payload#1, customer_id#4, event_type#10, logical_date_int#16, tenant_id#23, split(customer_id#4, _, -1)[0] AS partition_id#31]
-      +- Project [header#0, payload#1, customer_id#4, event_type#10, logical_date_int#16, cast(header#0.tenant_id as string) AS tenant_id#23]
-         +- Project [header#0, payload#1, customer_id#4, event_type#10, header#0.logical_date AS logical_date_int#16]
-            +- Project [header#0, payload#1, customer_id#4, header#0.event_type AS event_type#10]
-               +- Project [header#0, payload#1, header#0.entity_id AS customer_id#4]
-                  +- Relation [header#0,payload#1] avro
+package rastest
 
-	at org.apache.spark.sql.catalyst.analysis.package$AnalysisErrorAt.dataTypeMismatch(package.scala:73)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$6(CheckAnalysis.scala:277)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$6$adapted(CheckAnalysis.scala:264)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:244)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.$anonfun$foreachUp$1(TreeNode.scala:243)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.$anonfun$foreachUp$1$adapted(TreeNode.scala:243)
-	at scala.collection.immutable.Vector.foreach(Vector.scala:2124)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:243)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.$anonfun$foreachUp$1(TreeNode.scala:243)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.$anonfun$foreachUp$1$adapted(TreeNode.scala:243)
-	at scala.collection.immutable.Vector.foreach(Vector.scala:2124)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:243)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$5(CheckAnalysis.scala:264)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$5$adapted(CheckAnalysis.scala:264)
-	at scala.collection.immutable.List.foreach(List.scala:333)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$2(CheckAnalysis.scala:264)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$2$adapted(CheckAnalysis.scala:182)
-	at org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:244)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis0(CheckAnalysis.scala:182)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis0$(CheckAnalysis.scala:164)
-	at org.apache.spark.sql.catalyst.analysis.Analyzer.checkAnalysis0(Analyzer.scala:188)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis(CheckAnalysis.scala:160)
-	at org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis$(CheckAnalysis.scala:150)
-	at org.apache.spark.sql.catalyst.analysis.Analyzer.checkAnalysis(Analyzer.scala:188)
-	at org.apache.spark.sql.catalyst.analysis.Analyzer.$anonfun$executeAndCheck$1(Analyzer.scala:211)
-	at org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper$.markInAnalyzer(AnalysisHelper.scala:330)
-	at org.apache.spark.sql.catalyst.analysis.Analyzer.executeAndCheck(Analyzer.scala:208)
-	at org.apache.spark.sql.execution.QueryExecution.$anonfun$analyzed$1(QueryExecution.scala:77)
-	at org.apache.spark.sql.catalyst.QueryPlanningTracker.measurePhase(QueryPlanningTracker.scala:138)
-	at org.apache.spark.sql.execution.QueryExecution.$anonfun$executePhase$2(QueryExecution.scala:219)
-	at org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:546)
-	at org.apache.spark.sql.execution.QueryExecution.$anonfun$executePhase$1(QueryExecution.scala:219)
-	at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:900)
-	at org.apache.spark.sql.execution.QueryExecution.executePhase(QueryExecution.scala:218)
-	at org.apache.spark.sql.execution.QueryExecution.analyzed$lzycompute(QueryExecution.scala:77)
-	at org.apache.spark.sql.execution.QueryExecution.analyzed(QueryExecution.scala:74)
-	at org.apache.spark.sql.execution.QueryExecution.assertAnalyzed(QueryExecution.scala:66)
-	at org.apache.spark.sql.Dataset$.$anonfun$ofRows$1(Dataset.scala:91)
-	at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:900)
-	at org.apache.spark.sql.Dataset$.ofRows(Dataset.scala:89)
-	at org.apache.spark.sql.Dataset.withPlan(Dataset.scala:4363)
-	at org.apache.spark.sql.Dataset.select(Dataset.scala:1541)
-	at org.apache.spark.sql.Dataset.withColumns(Dataset.scala:2782)
-	at org.apache.spark.sql.Dataset.withColumn(Dataset.scala:2721)
-	at rastest.PartitionedAvroFileEventConsumer$.main(PartitionedAvroConsumer.scala:56)
-	at rastest.PartitionedAvroFileEventConsumer.main(PartitionedAvroConsumer.scala)
-25/07/18 17:47:42 INFO SparkContext: Invoking stop() from shutdown hook
-25/07/18 17:47:42 INFO SparkContext: SparkContext is stopping with exitCode 0.
-25/07/18 17:47:42 INFO SparkUI: Stopped Spark web UI at http://BLR1-LTCL68YD3.FNFIS.com:4040
-25/07/18 17:47:43 INFO MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
-25/07/18 17:47:43 INFO MemoryStore: MemoryStore cleared
-25/07/18 17:47:43 INFO BlockManager: BlockManager stopped
-25/07/18 17:47:43 INFO BlockManagerMaster: BlockManagerMaster stopped
-25/07/18 17:47:43 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
-25/07/18 17:47:43 INFO SparkContext: Successfully stopped SparkContext
-25/07/18 17:47:43 INFO ShutdownHookManager: Shutdown hook called
-25/07/18 17:47:43 INFO ShutdownHookManager: Deleting directory C:\Users\E5655076\AppData\Local\Temp\1\spark-372556f1-19b4-47c8-9339-c577a3504f03
+import org.apache.spark.sql.{SparkSession, SaveMode, Row}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import org.apache.avro.Schema
+import org.apache.avro.generic.{GenericRecord, GenericData}
+import org.apache.avro.io.{DatumWriter, EncoderFactory}
+import org.apache.avro.generic.GenericDatumWriter
+import java.io.ByteArrayOutputStream
+import java.nio.file.{Files, Paths}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import scala.io.Source
+import scala.util.Random
 
-Process finished with exit code 1
+object AvroEventProducerWithPartitionedFolder {
+  def main(args: Array[String]): Unit = {
+    // Spark setup
+    val spark = SparkSession.builder()
+      .appName("Partitioned Avro Event Producer (File)")
+      .master("local[*]")
+      .getOrCreate()
+    import spark.implicits._
+
+    // Configs/paths
+    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
+    val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
+    val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
+    val logicalDateDays = logicalDate.toEpochDay.toInt
+    val tenantId = 42
+    val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
+
+    // Load Avro schemas
+    val wrapperSchemaStr = Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString
+    val nameSchemaStr = Source.fromFile("src/main/avro/NamePayload.avsc").mkString
+    val addressSchemaStr = Source.fromFile("src/main/avro/AddressPayload.avsc").mkString
+    val idSchemaStr = Source.fromFile("src/main/avro/IdentificationPayload.avsc").mkString
+
+    val wrapperSchema = new Schema.Parser().parse(wrapperSchemaStr)
+    val headerSchema = wrapperSchema.getField("header").schema()
+    val nameSchema = new Schema.Parser().parse(nameSchemaStr)
+    val addressSchema = new Schema.Parser().parse(addressSchemaStr)
+    val idSchema = new Schema.Parser().parse(idSchemaStr)
+
+    // All existing customer ids
+    val customerIds = spark.read.parquet(customerMetaPath)
+      .select("customer_id").as[String].collect().toSeq
+
+    val random = new Random()
+
+    def buildEvent(
+      customerId: String,
+      eventType: String,
+      partitionId: String,
+      isNew: Boolean = false
+    ): (String, Int, String, Int, String, String, Array[Byte], Array[Byte]) = {
+      // Build Avro header
+      val header = new GenericData.Record(headerSchema)
+      header.put("event_timestamp", System.currentTimeMillis())
+      header.put("logical_date", logicalDateDays)
+      header.put("event_type", eventType)
+      header.put("tenant_id", tenantId)
+      header.put("entity_id", customerId)
+
+      // Build Avro payload
+      val (payloadSchema, payloadRecord) = eventType match {
+        case "NAME" =>
+          val rec = new GenericData.Record(nameSchema)
+          rec.put("customer_id", customerId)
+          rec.put("first", if (isNew) s"First_$customerId" else s"UpdatedFirst_$customerId")
+          rec.put("middle", if (isNew) "X" else "Z")
+          rec.put("last", if (isNew) s"Last_$customerId" else s"UpdatedLast_$customerId")
+          (nameSchema, rec)
+        case "ADDRESS" =>
+          val rec = new GenericData.Record(addressSchema)
+          rec.put("customer_id", customerId)
+          rec.put("type", new GenericData.EnumSymbol(
+            addressSchema.getField("type").schema(),
+            if (random.nextBoolean()) "HOME" else "WORK"
+          ))
+          rec.put("street", s"AddrStreet_$customerId")
+          rec.put("city", s"AddrCity_$partitionId")
+          rec.put("postal_code", f"Code_${random.nextInt(1000)}%03d")
+          rec.put("country", if (isNew) "CountryY" else "NewCountryX")
+          (addressSchema, rec)
+        case "IDENTIFICATION" =>
+          val rec = new GenericData.Record(idSchema)
+          rec.put("customer_id", customerId)
+          rec.put("type", "passport")
+          rec.put("number", s"ID_$customerId")
+          rec.put("issuer", if (isNew) "GovB" else "GovX")
+          (idSchema, rec)
+      }
+
+      // Avro serialize payload
+      def serialize(schema: Schema, record: GenericRecord): Array[Byte] = {
+        val out = new ByteArrayOutputStream()
+        val encoder = EncoderFactory.get().binaryEncoder(out, null)
+        val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](schema)
+        writer.write(record, encoder)
+        encoder.flush()
+        out.close()
+        out.toByteArray
+      }
+      val payloadBytes = serialize(payloadSchema, payloadRecord)
+
+      // Build the wrapper event (header + payload)
+      val wrapper = new GenericData.Record(wrapperSchema)
+      wrapper.put("header", header)
+      wrapper.put("payload", java.nio.ByteBuffer.wrap(payloadBytes))
+
+      // Serialize wrapper as bytes for writing, or keep header/payload as needed
+      val wrapperBytes = serialize(wrapperSchema, wrapper)
+
+      (
+        partitionId, tenantId, customerId, logicalDateDays, eventType,
+        // These fields can be used for further partitioning or analysis
+        // Save either the full wrapperBytes, or the header and payload as Avro schema, your call
+        // We'll keep the structure for downstream access
+        eventType,
+        payloadBytes,
+        wrapperBytes
+      )
+    }
+
+    // ---- MODIFIED (existing customers): 4M events ----
+    val nModified = 4000000
+    val modifiedEvents = spark.sparkContext.parallelize(1 to nModified, numSlices = 64).map { _ =>
+      val idx = random.nextInt(customerIds.length)
+      val customerId = customerIds(idx)
+      val partitionId = customerId.split("_").headOption.getOrElse("0")
+      val eventType = eventTypes(random.nextInt(eventTypes.length))
+      buildEvent(customerId, eventType, partitionId, isNew = false)
+    }
+
+    // ---- NEW customers: 500K X 5 events ----
+    val nNewCustomers = 500000
+    val newEvents = spark.sparkContext.parallelize(1 to nNewCustomers, numSlices = 32).flatMap { _ =>
+      val partitionId = random.nextInt(8).toString
+      val newCustomerId = f"${partitionId}_9${random.nextInt(999999)}%06d"
+      // 5 events per new customer: 1 NAME, 2 ADDRESS, 2 IDENTIFICATION
+      Seq(
+        buildEvent(newCustomerId, "NAME", partitionId, isNew = true),
+        buildEvent(newCustomerId, "ADDRESS", partitionId, isNew = true),
+        buildEvent(newCustomerId, "ADDRESS", partitionId, isNew = true),
+        buildEvent(newCustomerId, "IDENTIFICATION", partitionId, isNew = true),
+        buildEvent(newCustomerId, "IDENTIFICATION", partitionId, isNew = true)
+      )
+    }
+
+    // Convert to DataFrame
+    val eventSchema = StructType(Seq(
+      StructField("partition_id", StringType),
+      StructField("tenant_id", IntegerType),
+      StructField("customer_id", StringType),
+      StructField("logical_date", IntegerType),
+      StructField("event_type", StringType),
+      StructField("event_type2", StringType), // same as event_type, can be removed
+      StructField("payload_bytes", BinaryType),
+      StructField("wrapper_bytes", BinaryType)
+    ))
+
+    val modifiedDF = spark.createDataFrame(modifiedEvents.map(Row.fromTuple), eventSchema)
+    val newDF = spark.createDataFrame(newEvents.map(Row.fromTuple), eventSchema)
+
+    // If you want to keep the Avro structure, you should NOT DROP wrapper fields.
+    // You can either write the full wrapper as one Avro binary blob (hard for downstream),
+    // or if your Avro schema matches, you can reconstruct the wrapper
+
+    // For better Parquet usability, break out header fields as top-level columns before writing
+    // Partition by tenant/partition/logical_date
+
+    // ---- Write Modified ----
+    modifiedDF
+      .withColumn("event_timestamp", lit(System.currentTimeMillis())) // for example
+      .write
+      .mode(SaveMode.Overwrite)
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("avro")
+      .save(s"$baseOutputPath/modified")
+
+    // ---- Write New ----
+    newDF
+      .withColumn("event_timestamp", lit(System.currentTimeMillis())) // for example
+      .write
+      .mode(SaveMode.Overwrite)
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("avro")
+      .save(s"$baseOutputPath/new")
+
+    println(s"✅ Wrote Avro events: $baseOutputPath/modified and $baseOutputPath/new, partitioned folders")
+
+    spark.stop()
+  }
+}
