@@ -24,11 +24,11 @@ object AvroEventProducerWithPartitionedFolder {
     val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
     val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
     val logicalDateStr = logicalDate.format(DateTimeFormatter.ISO_DATE)  // "2025-04-03"
-    val logicalDateInt = logicalDate.toEpochDay.toInt                    // 20181 etc.
+    val logicalDateInt = logicalDate.toEpochDay.toInt                    // 20181
     val tenantId = 42
     val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
 
-    // Load Avro schemas (header, payloads, wrapper)
+    // Avro schema loading
     val wrapperSchemaStr = Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString
     val nameSchemaStr = Source.fromFile("src/main/avro/NamePayload.avsc").mkString
     val addressSchemaStr = Source.fromFile("src/main/avro/AddressPayload.avsc").mkString
@@ -52,7 +52,6 @@ object AvroEventProducerWithPartitionedFolder {
       isNew: Boolean = false
     ): (String, Int, String, Int, String, Array[Byte], Array[Byte], String, Long) = {
       val eventTimestamp = System.currentTimeMillis()
-      // Build Avro header (logical_date as INT)
       val header = new GenericData.Record(headerSchema)
       header.put("event_timestamp", eventTimestamp)
       header.put("logical_date", logicalDateInt)
@@ -99,15 +98,13 @@ object AvroEventProducerWithPartitionedFolder {
         out.toByteArray
       }
       val payloadBytes = serialize(payloadSchema, payloadRecord)
-
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
       wrapper.put("payload", java.nio.ByteBuffer.wrap(payloadBytes))
       val wrapperBytes = serialize(wrapperSchema, wrapper)
-
       (
         partitionId, tenantId, customerId, logicalDateInt, eventType,
-        payloadBytes, wrapperBytes, logicalDateStr, eventTimestamp  // <----- event_timestamp ADDED
+        payloadBytes, wrapperBytes, logicalDateStr, eventTimestamp
       )
     }
 
@@ -142,7 +139,7 @@ object AvroEventProducerWithPartitionedFolder {
       StructField("payload_bytes", BinaryType),
       StructField("wrapper_bytes", BinaryType),
       StructField("logical_date", StringType),   // for partitioning
-      StructField("event_timestamp", LongType)   // <--- ADDED!
+      StructField("event_timestamp", LongType)   // required by merge job
     ))
 
     val modifiedDF = spark.createDataFrame(modifiedEvents.map(Row.fromTuple), eventSchema)
