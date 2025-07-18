@@ -2,8 +2,6 @@ package rastest
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
-import java.nio.file.{Paths, Files}
-import java.nio.charset.StandardCharsets
 
 object PartitionedAvroEventConsumerBatch {
   def main(args: Array[String]): Unit = {
@@ -12,37 +10,31 @@ object PartitionedAvroEventConsumerBatch {
       .master("local[*]")
       .getOrCreate()
 
-    import spark.implicits._
-
     val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
 
-    // Ingest both "modified" and "new" folders
-    val avroDF = spark.read
-      .format("avro")
-      .load(
-        s"$avroInputBase/modified",
-        s"$avroInputBase/new"
-      )
+    // Read each separately and union (avoids Spark's directory structure conflict)
+    val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
+    val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
+    val avroDF     = dfModified.unionByName(dfNew)
 
-    // Explode fields expected by merge job
-    val parsed = avroDF
-      .withColumn("customer_id", col("header.entity_id"))
-      .withColumn("event_type", col("header.event_type"))
-      .withColumn("logical_date", col("logical_date")) // This is a string, partition column as written by the producer
-      .withColumn("tenant_id", col("tenant_id"))
-      .withColumn("partition_id", col("partition_id"))
-      .withColumn("event_timestamp", col("header.event_timestamp"))
-      .withColumn("payload", col("payload"))
-      .select(
-        "partition_id",
-        "tenant_id",
-        "customer_id",
-        "event_timestamp",
-        "logical_date",
-        "event_type",
-        "payload"
-      )
+    // Confirm the schema matches your expectations; uncomment for debugging:
+    // avroDF.printSchema()
+
+    // If your producer placed event_timestamp or payload in a different column, adjust as needed.
+    // Below assumes you have these as top-level columns;
+    // If not, just remove or adjust event_timestamp/payload as fits your actual schema.
+
+    val parsed = avroDF.select(
+      col("partition_id"),
+      col("tenant_id"),
+      col("customer_id"),
+      col("event_type"),
+      col("payload_bytes").as("payload"),  // or adjust to col("payload") if that's the column
+      // If you want the event_timestamp, uncomment below, or remove if not present in your schema:
+      // col("event_timestamp"),
+      col("logical_date")
+    )
 
     // Write as partitioned Parquet for downstream merge job
     parsed.write
