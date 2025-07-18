@@ -1,6 +1,7 @@
 package rastest
 
-import org.apache.spark.sql.{DataFrame, SparkSession, functions => F}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.avro._
 import java.nio.file.{Files, Paths}
 import java.nio.charset.StandardCharsets
@@ -15,79 +16,58 @@ object FileBasedAvroEventConsumer {
 
     import spark.implicits._
 
+    // Paths and configs
     val baseInputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/2025-04-03"
-    val existingInputPath = s"$baseInputPath/existing"
-    val newInputPath = s"$baseInputPath/new"
-    val outputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
-
-    // Load your wrapper schema JSON (CustomerEvent.avsc)
-    val wrapperSchemaJson = new String(
-      Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")),
-      StandardCharsets.UTF_8
-    )
-
-    // Read all Avro event files (existing + new)
-    val existingDF = spark.read.format("avro").load(existingInputPath)
-    val newDF = spark.read.format("avro").load(newInputPath)
-    val eventsDF = existingDF.union(newDF)
-
-    // Parse the "payload" bytes column inside the wrapper event,
-    // based on the event_type in header
-    // So first parse wrapper to struct, then parse payload bytes to actual schema
-
-    val parsedEventsDF = eventsDF
-      .select(
-        from_avro(F.col("header").cast("binary"), wrapperSchemaJson).alias("header"),
-        F.col("payload")
-      )
-      .selectExpr(
-        "header.event_type as event_type",
-        "header.entity_id as customer_id",
-        "header.tenant_id as tenant_id",
-        "header.logical_date as logical_date",
-        "payload"
-      )
-
-    // Load individual payload schemas for decoding "payload" bytes
+    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
+    
+    // Load schema json strings from your original avro schema files
+    val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")), StandardCharsets.UTF_8)
     val nameSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/NamePayload.avsc")), StandardCharsets.UTF_8)
     val addressSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/AddressPayload.avsc")), StandardCharsets.UTF_8)
     val idSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/IdentificationPayload.avsc")), StandardCharsets.UTF_8)
 
-    // Helper function to decode payload bytes per event type
-    def decodePayload(df: DataFrame, eventType: String, schemaJson: String) = {
-      df.filter($"event_type" === eventType)
-        .select(
-          $"tenant_id",
-          $"customer_id",
-          $"logical_date",
-          from_avro($"payload", schemaJson).alias("payload_parsed")
-        )
-        .selectExpr(
-          "customer_id",
-          "tenant_id",
-          "logical_date",
-          // extract all fields from payload_parsed struct as columns
-          "payload_parsed.*"
-        )
-        .withColumn("event_type", F.lit(eventType))
-    }
+    // Read all Avro event files from both existing/new folders (adjust as needed)
+    val inputDF = spark.read.format("avro")
+      .load(s"$baseInputPath/existing/*.avro", s"$baseInputPath/new/*.avro")
 
-    // Decode each event type separately and union
-    val nameEventsDF = decodePayload(parsedEventsDF, "NAME", nameSchemaJson)
-    val addressEventsDF = decodePayload(parsedEventsDF, "ADDRESS", addressSchemaJson)
-    val idEventsDF = decodePayload(parsedEventsDF, "IDENTIFICATION", idSchemaJson)
+    // inputDF schema: header: struct, payload: binary(bytes)
+    // Extract header fields directly (struct)
+    val withHeaderCols = inputDF
+      .withColumn("customer_id", col("header.entity_id"))
+      .withColumn("event_type", col("header.event_type"))
+      .withColumn("logical_date", col("header.logical_date"))
+      .withColumn("tenant_id", col("header.tenant_id"))
+      .withColumn("partition_id", split(col("customer_id"), "_")(0))
+      .withColumn("event_timestamp", col("header.event_timestamp"))
+      .withColumn("payload_bytes", col("payload"))
 
-    val allEventsDF = nameEventsDF.union(addressEventsDF).union(idEventsDF)
-      .withColumn("partition_id", F.split($"customer_id", "_").getItem(0))
-      .withColumn("logical_date", F.to_date($"logical_date".cast("string"))) // convert logical_date int to date if needed
+    // Decode payload bytes based on event_type
+    val decodedPayload = withHeaderCols.withColumn("payload_decoded",
+      when(col("event_type") === "NAME", from_avro(col("payload_bytes"), nameSchemaJson))
+       .when(col("event_type") === "ADDRESS", from_avro(col("payload_bytes"), addressSchemaJson))
+       .when(col("event_type") === "IDENTIFICATION", from_avro(col("payload_bytes"), idSchemaJson))
+       .otherwise(null)
+    )
 
-    // Write the data partitioned by tenant_id, partition_id, logical_date as Parquet
-    allEventsDF.write
+    // Flatten columns by merging header + payload fields
+    val flattened = decodedPayload.select(
+      col("partition_id"),
+      col("tenant_id"),
+      col("customer_id"),
+      col("event_timestamp"),
+      col("logical_date"),
+      col("event_type"),
+      // Flatten fields from payload_decoded struct
+      col("payload_decoded.*")
+    )
+
+    // Write parquet partitioned by tenant_id, partition_id, logical_date (as required for merge job)
+    flattened.write
       .mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
-      .parquet(outputPath)
+      .parquet(baseOutputPath)
 
-    println("✅ Finished reading Avro events and writing partitioned Parquet for merge job.")
+    println("✅ Finished reading Avro events, decoding payloads, and writing partitioned parquet for merge job.")
     spark.stop()
   }
 }
