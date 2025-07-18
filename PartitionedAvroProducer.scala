@@ -1,18 +1,17 @@
 package rastest
 
-import java.io.{ByteArrayOutputStream, File}
+import org.apache.avro.Schema
+import org.apache.avro.file.DataFileWriter
+import org.apache.avro.generic.{GenericData, GenericDatumWriter, GenericRecord}
+import org.apache.avro.io.{DatumWriter, EncoderFactory}
+import org.apache.spark.sql.SparkSession
+
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.file.{Files, Paths}
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Random
-
-import org.apache.avro.Schema
-import org.apache.avro.generic.{GenericData, GenericRecord}
-import org.apache.avro.file.DataFileWriter
-import org.apache.avro.io.{DatumWriter, EncoderFactory, GenericDatumWriter}
-
-import org.apache.spark.sql.SparkSession
 import scala.io.Source
 
 object ParallelPartitionedAvroProducer {
