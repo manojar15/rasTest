@@ -1,0 +1,25 @@
+{
+  "type": "record",
+  "name": "CustomerEvent",
+  "namespace": "com.example.customer",
+  "fields": [
+    {
+      "name": "header",
+      "type": {
+        "type": "record",
+        "name": "EventHeader",
+        "fields": [
+          { "name": "event_timestamp", "type": "long" },
+          { "name": "logical_date", "type": { "type": "int", "logicalType": "date" } },
+          { "name": "event_type", "type": "string" },
+          { "name": "tenant_id", "type": "int" },
+          { "name": "entity_id", "type": "string" }
+        ]
+      }
+    },
+    {
+      "name": "payload",
+      "type": "bytes"
+    }
+  ]
+}

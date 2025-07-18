@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "IdentificationPayload",
+  "namespace": "com.example.customer.identification",
+  "fields": [
+    { "name": "customer_id", "type": "string" },
+    { "name": "type", "type": "string" },
+    { "name": "number", "type": "string" },
+    { "name": "issuer", "type": "string" }
+  ]
+}

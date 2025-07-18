@@ -1,0 +1,61 @@
+{
+  "type": "record",
+  "name": "Customer",
+  "namespace": "com.example",
+  "fields": [
+    { "name": "tenant_id", "type": "string" },
+    { "name": "customer_id", "type": "string" },
+    { "name": "logical_date", "type": { "type": "int", "logicalType": "date" } },
+    {
+      "name": "name",
+      "type": {
+        "type": "record",
+        "name": "Name",
+        "fields": [
+          { "name": "firstName", "type": "string" },
+          { "name": "lastName", "type": "string" },
+          { "name": "middleName", "type": "string" }
+        ]
+      }
+    },
+    {
+      "name": "addresses",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "Address",
+          "fields": [
+            {
+              "name": "type",
+              "type": {
+                "type": "enum",
+                "name": "AddressType",
+                "symbols": ["HOME", "WORK"]
+              }
+            },
+            { "name": "street", "type": "string" },
+            { "name": "city", "type": "string" },
+            { "name": "postal_code", "type": "string" },
+            { "name": "country", "type": "string" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "identifications",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "Identification",
+          "fields": [
+            { "name": "type", "type": "string" },
+            { "name": "number", "type": "string" },
+            { "name": "issuer", "type": "string" }
+          ]
+        }
+      }
+    }
+  ]
+}

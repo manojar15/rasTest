@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "NamePayload",
+  "namespace": "com.example.customer.name",
+  "fields": [
+    { "name": "customer_id", "type": "string" },
+    { "name": "first", "type": "string" },
+    { "name": "middle", "type": ["null", "string"], "default": null },
+    { "name": "last", "type": "string" }
+  ]
+}

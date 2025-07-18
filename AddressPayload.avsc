@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "AddressPayload",
+  "namespace": "com.example.customer.address",
+  "fields": [
+    { "name": "customer_id", "type": "string" },
+    { "name": "type", "type": { "type": "enum", "name": "AddressType", "symbols": ["HOME", "WORK"] } },
+    { "name": "street", "type": "string" },
+    { "name": "city", "type": "string" },
+    { "name": "postal_code", "type": "string" },
+    { "name": "country", "type": "string" }
+  ]
+}
