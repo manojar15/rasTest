@@ -1,0 +1,58 @@
+package rastest
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
+import java.nio.file.{Paths, Files}
+import java.nio.charset.StandardCharsets
+
+object PartitionedAvroEventConsumerBatch {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Partitioned Avro Event Consumer (Batch)")
+      .master("local[*]")
+      .getOrCreate()
+
+    import spark.implicits._
+
+    val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
+    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
+
+    // Ingest both "modified" and "new" folders
+    val avroDF = spark.read
+      .format("avro")
+      .load(
+        s"$avroInputBase/modified",
+        s"$avroInputBase/new"
+      )
+
+    // Explode fields expected by merge job
+    val parsed = avroDF
+      .withColumn("customer_id", col("header.entity_id"))
+      .withColumn("event_type", col("header.event_type"))
+      .withColumn("logical_date", col("logical_date")) // This is a string, partition column as written by the producer
+      .withColumn("tenant_id", col("tenant_id"))
+      .withColumn("partition_id", col("partition_id"))
+      .withColumn("event_timestamp", col("header.event_timestamp"))
+      .withColumn("payload", col("payload"))
+      .select(
+        "partition_id",
+        "tenant_id",
+        "customer_id",
+        "event_timestamp",
+        "logical_date",
+        "event_type",
+        "payload"
+      )
+
+    // Write as partitioned Parquet for downstream merge job
+    parsed.write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("parquet")
+      .save(baseOutputPath)
+
+    println(s"✅ Avro events processed to Parquet partitions at $baseOutputPath")
+
+    spark.stop()
+  }
+}
