@@ -1,69 +1,102 @@
-package customer.consumer
+package rastest
 
-import org.apache.avro.Schema import org.apache.avro.generic.{GenericDatumReader, GenericRecord} import org.apache.avro.io.{DecoderFactory} import org.apache.spark.sql.{Dataset, Row, SaveMode, SparkSession} import org.apache.spark.sql.functions._ import java.nio.file.{Files, Paths} import java.time.LocalDate import scala.collection.JavaConverters._ import scala.util.Try
+import org.apache.spark.sql.{SparkSession, DataFrame}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.avro._
+import java.nio.file.{Files, Paths}
+import scala.io.Source
 
-object FileBasedAvroConsumerJob {
+object PartitionedAvroConsumer {
 
-val payloadSchemas: Map[String, Schema] = Map( "NameUpdated" -> new Schema.Parser().parse(Files.newBufferedReader(Paths.get("src/main/avro/NamePayload.avsc"))), "AddressChanged" -> new Schema.Parser().parse(Files.newBufferedReader(Paths.get("src/main/avro/AddressPayload.avsc"))), "IdentificationChanged" -> new Schema.Parser().parse(Files.newBufferedReader(Paths.get("src/main/avro/IdentificationPayload.avsc"))) )
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("PartitionedAvroConsumer")
+      .master("local[*]")
+      .getOrCreate()
 
-def deserializePayload(payloadBytes: Array[Byte], eventType: String): Option[GenericRecord] = { payloadSchemas.get(eventType).flatMap { schema => val decoder = DecoderFactory.get().binaryDecoder(payloadBytes, null) val reader = new GenericDatumReaderGenericRecord Try(reader.read(null, decoder)).toOption } }
+    import spark.implicits._
 
-def main(args: Array[String]): Unit = { val spark = SparkSession.builder() .appName("FileBasedAvroConsumerJob") .master("local[*]") .getOrCreate() import spark.implicits._
+    // 1. Load all avro files from existing and new folders
+    val basePath = "avro_output"
+    val folders = Seq("existing", "new").flatMap { sub =>
+      val path = s"$basePath/$sub"
+      val dir = new java.io.File(path)
+      if (dir.exists && dir.isDirectory)
+        dir.listFiles.filter(_.isDirectory).map(_.getPath)
+      else Seq.empty
+    }
 
-val baseDirs = Seq("avro_output/existing", "avro_output/new")
-val allDirs = baseDirs.flatMap { base =>
-  val path = Paths.get(base)
-  if (Files.exists(path)) Files.list(path).iterator().asScala.map(_.toString).toSeq else Seq.empty
-}
+    // 2. Read all Avro files (CustomerEvent) into DataFrame
+    val allDF = folders.map(path => spark.read.format("avro").load(path)).reduce(_ union _)
 
-val customerEventSchema = new Schema.Parser().parse(Files.newBufferedReader(Paths.get("src/main/avro/CustomerEvent.avsc")))
+    // 3. Load CustomerEvent schema
+    val eventSchemaJson = Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString
+    val namePayloadSchemaJson = Source.fromFile("src/main/avro/NamePayload.avsc").mkString
+    val addressPayloadSchemaJson = Source.fromFile("src/main/avro/AddressPayload.avsc").mkString
+    val identificationPayloadSchemaJson = Source.fromFile("src/main/avro/IdentificationPayload.avsc").mkString
 
-val allAvroDF = allDirs.flatMap { path =>
-  Try(spark.read.format("avro").load(path)).toOption
-}.reduce(_ union _)
+    // 4. Parse and extract payload
+    val withDecoded = allDF
+      .withColumn("header", $"header")
+      .withColumn("payload_bytes", $"payload")
+      .withColumn("event_type", $"header.event_type")
+      .withColumn("tenant_id", $"header.tenant_id")
+      .withColumn("customer_id", $"header.entity_id")
+      .withColumn("logical_date", $"header.logical_date")
+      .withColumn("event_timestamp", $"header.event_timestamp")
 
-val enriched = allAvroDF.flatMap { row =>
-  val header = row.getAs[Row]("header")
-  val payloadBytes = row.getAs[Array[Byte]]("payload")
+    val nameDF = withDecoded
+      .filter($"event_type" === "NAME_CHANGED")
+      .withColumn("payload_json", from_avro($"payload_bytes", namePayloadSchemaJson))
+      .select($"tenant_id", $"customer_id", $"logical_date", $"event_timestamp",
+        $"payload_json.first".as("firstName"),
+        $"payload_json.middle".as("middleName"),
+        $"payload_json.last".as("lastName")
+      )
 
-  val eventType = header.getAs[String]("event_type")
-  val tenantId = header.getAs[Int]("tenant_id")
-  val entityId = header.getAs[String]("entity_id")
-  val logicalDateInt = header.getAs[Int]("logical_date")
-  val eventTimestamp = header.getAs[Long]("event_timestamp")
+    val addressDF = withDecoded
+      .filter($"event_type" === "ADDRESS_CHANGED")
+      .withColumn("payload_json", from_avro($"payload_bytes", addressPayloadSchemaJson))
+      .select($"tenant_id", $"customer_id", $"logical_date", $"event_timestamp",
+        $"payload_json.type".as("type"),
+        $"payload_json.street",
+        $"payload_json.city",
+        $"payload_json.postal_code",
+        $"payload_json.country"
+      )
 
-  val payloadOpt = deserializePayload(payloadBytes, eventType)
+    val idDF = withDecoded
+      .filter($"event_type" === "IDENTIFICATION_CHANGED")
+      .withColumn("payload_json", from_avro($"payload_bytes", identificationPayloadSchemaJson))
+      .select($"tenant_id", $"customer_id", $"logical_date", $"event_timestamp",
+        $"payload_json.type".as("id_type"),
+        $"payload_json.number",
+        $"payload_json.issuer"
+      )
 
-  payloadOpt.map { genericRecord =>
-    val payloadMap = genericRecord.getSchema.getFields.asScala.map { field =>
-      val name = field.name()
-      val value = Option(genericRecord.get(name)).map(_.toString).orNull
-      name -> value
-    }.toMap
+    // 5. Write to partitioned Parquet files
+    nameDF
+      .withColumn("partition_id", lit("name"))
+      .write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .parquet("parquet_output/name")
 
-    (eventType, tenantId.toString, entityId, logicalDateInt, eventTimestamp, payloadMap)
+    addressDF
+      .withColumn("partition_id", lit("address"))
+      .write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .parquet("parquet_output/address")
+
+    idDF
+      .withColumn("partition_id", lit("identification"))
+      .write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .parquet("parquet_output/identification")
+
+    println("✅ Avro consumer completed successfully.")
+    spark.stop()
   }
-}.toDF("event_type", "tenant_id", "customer_id", "logical_date_int", "event_timestamp", "payload_map")
-
-val finalDF = enriched
-  .withColumn("logical_date", expr("date_add('1970-01-01', logical_date_int)"))
-  .withColumn("partition_id", col("customer_id"))
-  .select(
-    col("event_type"),
-    col("tenant_id"),
-    col("customer_id"),
-    col("logical_date"),
-    col("event_timestamp"),
-    col("partition_id"),
-    col("payload_map")
-  )
-
-finalDF.write
-  .mode(SaveMode.Overwrite)
-  .partitionBy("tenant_id", "partition_id", "logical_date")
-  .parquet("parquet_output/events")
-
-spark.stop()
-
-} }
-
+}
