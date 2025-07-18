@@ -13,12 +13,10 @@ object PartitionedAvroEventConsumerBatch {
     val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
 
-    // Read partitioned Avro files from both modified and new, then union
     val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
     val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
     val avroDF     = dfModified.unionByName(dfNew)
 
-    // Select top-level columns expected by the merge job
     val parsed = avroDF.select(
       col("partition_id"),
       col("tenant_id"),
@@ -29,7 +27,6 @@ object PartitionedAvroEventConsumerBatch {
       col("payload_bytes").as("payload")
     )
 
-    // Write partitioned Parquet output
     parsed.write
       .mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
