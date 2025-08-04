@@ -23,20 +23,27 @@ object PartitionedAvroEventConsumerBatch {
     val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
     val avroDF     = dfModified.unionByName(dfNew)
 
-    // Deserialize payload_bytes column into nested struct `event`
+    // Deserialize payload_bytes column into nested struct `event` with permissive mode
     val parsed = avroDF
-      .withColumn("event", from_avro(col("payload_bytes"), wrapperSchemaJson))
+      .withColumn(
+        "event",
+        from_avro(
+          col("payload_bytes"),
+          wrapperSchemaJson,
+          Map("mode" -> "PERMISSIVE")
+        )
+      )
       .select(
         col("partition_id"),
         col("tenant_id"),
         col("customer_id"),
         col("event.header.event_timestamp").as("event_timestamp"),
         col("event.header.logical_date").as("logical_date"),
-        col("event.header.event_type").as("event_type"),
-        // Add other nested fields you want to extract here, e.g. "payload" if needed
+        col("event.header.event_type").as("event_type")
+        // add other nested fields as needed
       )
 
-    // Write fully decoded data to Parquet partitions for downstream processing
+    // Write fully decoded data to Parquet partitions for downstream jobs
     parsed.write
       .mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
