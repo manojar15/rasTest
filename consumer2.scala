@@ -16,23 +16,23 @@ object PartitionedAvroEventConsumerBatch {
     val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
     val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
 
-    // Load Avro schema JSON for deserialization
     val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")), StandardCharsets.UTF_8)
 
-    val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
-    val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
-    val avroDF     = dfModified.unionByName(dfNew)
+    // Read Avro files with permissive mode on read
+    val dfModified = spark.read
+      .option("mode", "PERMISSIVE")
+      .format("avro")
+      .load(s"$avroInputBase/modified")
 
-    // Deserialize payload_bytes column into nested struct `event` with permissive mode
+    val dfNew = spark.read
+      .option("mode", "PERMISSIVE")
+      .format("avro")
+      .load(s"$avroInputBase/new")
+
+    val avroDF = dfModified.unionByName(dfNew)
+
     val parsed = avroDF
-      .withColumn(
-        "event",
-        from_avro(
-          col("payload_bytes"),
-          wrapperSchemaJson,
-          Map("mode" -> "PERMISSIVE")
-        )
-      )
+      .withColumn("event", from_avro(col("payload_bytes"), wrapperSchemaJson))
       .select(
         col("partition_id"),
         col("tenant_id"),
@@ -40,10 +40,8 @@ object PartitionedAvroEventConsumerBatch {
         col("event.header.event_timestamp").as("event_timestamp"),
         col("event.header.logical_date").as("logical_date"),
         col("event.header.event_type").as("event_type")
-        // add other nested fields as needed
       )
 
-    // Write fully decoded data to Parquet partitions for downstream jobs
     parsed.write
       .mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
