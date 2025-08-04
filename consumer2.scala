@@ -18,7 +18,6 @@ object PartitionedAvroEventConsumerBatch {
 
     val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")), StandardCharsets.UTF_8)
 
-    // Read Avro files with permissive mode on read
     val dfModified = spark.read
       .option("mode", "PERMISSIVE")
       .format("avro")
@@ -30,9 +29,11 @@ object PartitionedAvroEventConsumerBatch {
       .load(s"$avroInputBase/new")
 
     val avroDF = dfModified.unionByName(dfNew)
+      .filter(length(col("payload_bytes")) > 0) // Pre-filter empty/obviously bad records
 
     val parsed = avroDF
       .withColumn("event", from_avro(col("payload_bytes"), wrapperSchemaJson))
+      .filter(col("event").isNotNull) // Remove records where Avro decoding failed
       .select(
         col("partition_id"),
         col("tenant_id"),
@@ -40,6 +41,7 @@ object PartitionedAvroEventConsumerBatch {
         col("event.header.event_timestamp").as("event_timestamp"),
         col("event.header.logical_date").as("logical_date"),
         col("event.header.event_type").as("event_type")
+        // Add additional nested fields if you need
       )
 
     parsed.write
@@ -49,7 +51,6 @@ object PartitionedAvroEventConsumerBatch {
       .save(baseOutputPath)
 
     println(s"✅ Avro events fully deserialized and written to Parquet partitions at $baseOutputPath")
-
     spark.stop()
   }
 }
