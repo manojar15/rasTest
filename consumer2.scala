@@ -30,13 +30,13 @@ object PartitionedAvroEventConsumerBatch {
         col("partition_id"),
         col("tenant_id"),
         col("customer_id"),
-        col("event.event_timestamp").as("event_timestamp"),
-        col("event.logical_date").as("logical_date"),
-        col("event.event_type").as("event_type"),
-        // include any other nested fields you need
+        col("event.header.event_timestamp").as("event_timestamp"),
+        col("event.header.logical_date").as("logical_date"),
+        col("event.header.event_type").as("event_type"),
+        // Add other nested fields you want to extract here, e.g. "payload" if needed
       )
 
-    // Write fully decoded data to Parquet partitions for merge job
+    // Write fully decoded data to Parquet partitions for downstream processing
     parsed.write
       .mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
