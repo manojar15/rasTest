@@ -1,30 +1,50 @@
+package rastest
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.avro._
 import java.nio.file.{Files, Paths}
 import java.nio.charset.StandardCharsets
 
-// Load Avro schema JSON string
-val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")), StandardCharsets.UTF_8)
+object PartitionedAvroEventConsumerBatch {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Partitioned Avro Event Consumer (Batch)")
+      .master("local[*]")
+      .getOrCreate()
 
-val rawDF = spark.read.format("avro").load(s"$avroInputBase/modified")
+    val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
+    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
 
-// Assuming rawDF has a column 'wrapper_bytes' (or 'payload_bytes') containing raw Avro bytes
-// Convert the bytes column to a struct columns using from_avro
-val parsedDF = rawDF.withColumn("event", from_avro(col("wrapper_bytes"), wrapperSchemaJson))
+    // Load Avro schema JSON for deserialization
+    val wrapperSchemaJson = new String(Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")), StandardCharsets.UTF_8)
 
-// Now explode struct fields into top-level columns, for example:
-val flatDF = parsedDF.select(
-  col("partition_id"),
-  col("tenant_id"),
-  col("customer_id"),
-  col("event.header.event_timestamp").as("event_timestamp"),
-  col("event.header.logical_date").as("logical_date"),
-  col("event.header.event_type").as("event_type"),
-  // include other nested fields as needed
-)
+    val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
+    val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
+    val avroDF     = dfModified.unionByName(dfNew)
 
-// Write flatDF to Parquet for your merge job to consume
-flatDF.write
-  .mode("overwrite")
-  .partitionBy("tenant_id", "partition_id", "logical_date")
-  .format("parquet")
-  .save(baseOutputPath)
+    // Deserialize payload_bytes column into nested struct `event`
+    val parsed = avroDF
+      .withColumn("event", from_avro(col("payload_bytes"), wrapperSchemaJson))
+      .select(
+        col("partition_id"),
+        col("tenant_id"),
+        col("customer_id"),
+        col("event.event_timestamp").as("event_timestamp"),
+        col("event.logical_date").as("logical_date"),
+        col("event.event_type").as("event_type"),
+        // include any other nested fields you need
+      )
+
+    // Write fully decoded data to Parquet partitions for merge job
+    parsed.write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("parquet")
+      .save(baseOutputPath)
+
+    println(s"✅ Avro events fully deserialized and written to Parquet partitions at $baseOutputPath")
+
+    spark.stop()
+  }
+}
