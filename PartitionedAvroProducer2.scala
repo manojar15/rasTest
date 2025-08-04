@@ -1,64 +1,63 @@
 package rastest
 
-import org.apache.avro._
-import org.apache.avro.file.DataFileWriter
-import org.apache.avro.generic._
-import org.apache.avro.io.{EncoderFactory, DatumWriter, DatumReader, DecoderFactory}
-import org.apache.spark.sql.SparkSession
-
-import java.io.{ByteArrayOutputStream, File}
+import org.apache.avro.Schema
+import org.apache.avro.generic.{GenericData, GenericDatumWriter, GenericRecord}
+import org.apache.avro.io.{DatumWriter, EncoderFactory}
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{Row, SparkSession}
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.io.Source
 import scala.util.Random
 
-object FileBasedAvroEventProducer {
-
+object AvroEventProducerWithPartitionedFolder {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("File Based Avro Event Producer")
+      .appName("Partitioned Avro Event Producer (File)")
       .master("local[*]")
       .getOrCreate()
+    import spark.implicits._
 
+    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
+    val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
     val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
-    val logicalDateStr = logicalDate.toString
-    val logicalDateDays = logicalDate.toEpochDay.toInt
+    val logicalDateStr = logicalDate.format(DateTimeFormatter.ISO_DATE)
+    val logicalDateInt = logicalDate.toEpochDay.toInt
     val tenantId = 42
-    val rnd = new Random()
+    val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
 
-    // Load schemas
-    val wrapperSchema = new Schema.Parser().parse(Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString)
+    // Load Avro schemas
+    val wrapperSchemaStr = Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString
+    val nameSchemaStr = Source.fromFile("src/main/avro/NamePayload.avsc").mkString
+    val addressSchemaStr = Source.fromFile("src/main/avro/AddressPayload.avsc").mkString
+    val idSchemaStr = Source.fromFile("src/main/avro/IdentificationPayload.avsc").mkString
+
+    val wrapperSchema = new Schema.Parser().parse(wrapperSchemaStr)
     val headerSchema = wrapperSchema.getField("header").schema()
-    val nameSchema = new Schema.Parser().parse(Source.fromFile("src/main/avro/NamePayload.avsc").mkString)
-    val addressSchema = new Schema.Parser().parse(Source.fromFile("src/main/avro/AddressPayload.avsc").mkString)
-    val idSchema = new Schema.Parser().parse(Source.fromFile("src/main/avro/IdentificationPayload.avsc").mkString)
+    val nameSchema = new Schema.Parser().parse(nameSchemaStr)
+    val addressSchema = new Schema.Parser().parse(addressSchemaStr)
+    val idSchema = new Schema.Parser().parse(idSchemaStr)
 
-    // Load existing customer IDs
-    val existingCustomerIds = spark.read
-      .parquet("C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata")
-      .select("customer_id")
-      .as[String](spark.implicits.newStringEncoder)
-      .collect()
-      .toIndexedSeq
-    val broadcastCustomerIds = spark.sparkContext.broadcast(existingCustomerIds)
+    val customerIds = spark.read.parquet(customerMetaPath)
+      .select("customer_id").as[String].collect().toSeq
 
-    val baseOutputPath = s"C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output/$logicalDateStr"
-    val existingPath = s"$baseOutputPath/existing"
-    val newPath = s"$baseOutputPath/new"
+    val random = new Random()
 
-    def serializeToBytes(record: GenericRecord, schema: Schema): Array[Byte] = {
-      val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](schema)
-      val out = new ByteArrayOutputStream()
-      val encoder = EncoderFactory.get().binaryEncoder(out, null)
-      writer.write(record, encoder)
-      encoder.flush()
-      out.toByteArray
-    }
+    def buildEvent(
+        customerId: String,
+        eventType: String,
+        partitionId: String,
+        isNew: Boolean = false
+      ): (String, Int, String, Int, String, Array[Byte], Array[Byte], String, Long) = {
 
-    def generateWrapperRecord(customerId: String, eventType: String): GenericRecord = {
+      require(customerId != null && customerId.nonEmpty, "customerId must be non-null/non-empty")
+      require(eventTypes.contains(eventType), s"Invalid eventType: $eventType")
+
+      val eventTimestamp = System.currentTimeMillis()
       val header = new GenericData.Record(headerSchema)
-      header.put("event_timestamp", System.currentTimeMillis())
-      header.put("logical_date", logicalDateDays)
+      header.put("event_timestamp", eventTimestamp)
+      header.put("logical_date", logicalDateInt)
       header.put("event_type", eventType)
       header.put("tenant_id", tenantId)
       header.put("entity_id", customerId)
@@ -67,83 +66,111 @@ object FileBasedAvroEventProducer {
         case "NAME" =>
           val rec = new GenericData.Record(nameSchema)
           rec.put("customer_id", customerId)
-          rec.put("first", s"UpdatedFirst_$customerId")
-          rec.put("middle", "Z")
-          rec.put("last", s"UpdatedLast_$customerId")
+          rec.put("first", if (isNew) s"First_$customerId" else s"UpdatedFirst_$customerId")
+          rec.put("middle", if (isNew) "X" else "Z")
+          rec.put("last", if (isNew) s"Last_$customerId" else s"UpdatedLast_$customerId")
           (nameSchema, rec)
-
         case "ADDRESS" =>
+          val allowedTypes = addressSchema.getField("type").schema().getEnumSymbols
+          val typ = if (random.nextBoolean()) "HOME" else "WORK"
+          require(allowedTypes.contains(typ), s"Invalid enum for type: $typ")
           val rec = new GenericData.Record(addressSchema)
           rec.put("customer_id", customerId)
-          rec.put("type", new GenericData.EnumSymbol(addressSchema.getField("type").schema(), if (rnd.nextBoolean()) "HOME" else "WORK"))
-          rec.put("street", s"NewStreet_$customerId")
-          rec.put("city", s"NewCity_$customerId")
-          rec.put("postal_code", f"NewPC_${rnd.nextInt(999)}%03d")
-          rec.put("country", "NewCountryX")
+          rec.put("type", new GenericData.EnumSymbol(addressSchema.getField("type").schema(), typ))
+          rec.put("street", s"AddrStreet_$customerId")
+          rec.put("city", s"AddrCity_$partitionId")
+          rec.put("postal_code", f"Code_${random.nextInt(1000)}%03d")
+          rec.put("country", if (isNew) "CountryY" else "NewCountryX")
           (addressSchema, rec)
-
         case "IDENTIFICATION" =>
           val rec = new GenericData.Record(idSchema)
           rec.put("customer_id", customerId)
           rec.put("type", "passport")
-          rec.put("number", s"NEWID_$customerId")
-          rec.put("issuer", "GovX")
+          rec.put("number", s"ID_$customerId")
+          rec.put("issuer", if (isNew) "GovB" else "GovX")
           (idSchema, rec)
       }
 
-      val payloadBytes = serializeToBytes(payloadRecord, payloadSchema)
+      def serialize(schema: Schema, record: GenericRecord): Array[Byte] = {
+        require(schema != null)
+        require(record != null)
+        val out = new ByteArrayOutputStream()
+        val encoder = EncoderFactory.get().binaryEncoder(out, null)
+        val writer: DatumWriter[GenericRecord] = new GenericDatumWriter[GenericRecord](schema)
+        writer.write(record, encoder)
+        encoder.flush()
+        out.close()
+        out.toByteArray
+      }
+
+      val payloadBytes = serialize(payloadSchema, payloadRecord)
+      require(payloadBytes.nonEmpty, "Serialization produced empty byte array (payload)")
+
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
       wrapper.put("payload", java.nio.ByteBuffer.wrap(payloadBytes))
+      val wrapperBytes = serialize(wrapperSchema, wrapper)
+      require(wrapperBytes.nonEmpty, "Serialization produced empty byte array (wrapper)")
 
-      wrapper
+      (
+        partitionId, tenantId, customerId, logicalDateInt, eventType,
+        payloadBytes, wrapperBytes, logicalDateStr, eventTimestamp
+      )
     }
 
-    def writeAvroRecords(outputDir: String, partitionId: Int, records: Seq[GenericRecord], schema: Schema): Unit = {
-      val outFile = new File(s"$outputDir/events_partition_$partitionId.avro")
-      outFile.getParentFile.mkdirs()
-
-      val writer = new GenericDatumWriter[GenericRecord](schema)
-      val dataFileWriter = new DataFileWriter[GenericRecord](writer)
-      dataFileWriter.create(schema, outFile)
-
-      records.foreach(dataFileWriter.append)
-      dataFileWriter.close()
+    val nModified = 16000
+    val modifiedEvents = spark.sparkContext.parallelize(1 to nModified, numSlices = 64).map { _ =>
+      val idx = random.nextInt(customerIds.length)
+      val customerId = customerIds(idx)
+      val partitionId = customerId.split("_").headOption.getOrElse("0")
+      val eventType = eventTypes(random.nextInt(eventTypes.length))
+      buildEvent(customerId, eventType, partitionId, isNew = false)
     }
 
-    // Existing customers (simulate 16K events, 64 partitions)
-    spark.sparkContext.parallelize(1 to 16000, numSlices = 64)
-      .mapPartitionsWithIndex { case (partitionId, part) =>
-        val ids = broadcastCustomerIds.value
-        val buffer = part.map { _ =>
-          val customerId = ids(rnd.nextInt(ids.size))
-          val eventType = Seq("NAME", "ADDRESS", "IDENTIFICATION")(rnd.nextInt(3))
-          generateWrapperRecord(customerId, eventType)
-        }.toList
+    val nNewCustomers = 800
+    val newEvents = spark.sparkContext.parallelize(1 to nNewCustomers, numSlices = 32).flatMap { _ =>
+      val partitionId = random.nextInt(8).toString
+      val newCustomerId = f"${partitionId}_9${random.nextInt(999999)}%06d"
+      Seq(
+        buildEvent(newCustomerId, "NAME", partitionId, isNew = true),
+        buildEvent(newCustomerId, "ADDRESS", partitionId, isNew = true),
+        buildEvent(newCustomerId, "ADDRESS", partitionId, isNew = true),
+        buildEvent(newCustomerId, "IDENTIFICATION", partitionId, isNew = true),
+        buildEvent(newCustomerId, "IDENTIFICATION", partitionId, isNew = true)
+      )
+    }
 
-        writeAvroRecords(existingPath, partitionId, buffer, wrapperSchema)
-        Iterator.empty
-      }.count()
+    val eventSchema = StructType(Seq(
+      StructField("partition_id", StringType),
+      StructField("tenant_id", IntegerType),
+      StructField("customer_id", StringType),
+      StructField("logical_date_int", IntegerType),
+      StructField("event_type", StringType),
+      StructField("payload_bytes", BinaryType),
+      StructField("wrapper_bytes", BinaryType),
+      StructField("logical_date", StringType),
+      StructField("event_timestamp", LongType)
+    ))
 
-    // New customers (simulate 4K customers × 5 events each, 32 partitions)
-    spark.sparkContext.parallelize(1 to 800, numSlices = 32)
-      .mapPartitionsWithIndex { case (partitionId, part) =>
-        val buffer = part.flatMap { _ =>
-          val newCustomerId = f"NEW_${rnd.nextInt(9999999)}%07d"
-          Seq(
-            generateWrapperRecord(newCustomerId, "NAME"),
-            generateWrapperRecord(newCustomerId, "ADDRESS"),
-            generateWrapperRecord(newCustomerId, "ADDRESS"),
-            generateWrapperRecord(newCustomerId, "IDENTIFICATION"),
-            generateWrapperRecord(newCustomerId, "IDENTIFICATION")
-          )
-        }.toList
+    val modifiedDF = spark.createDataFrame(modifiedEvents.map(Row.fromTuple), eventSchema)
+    val newDF = spark.createDataFrame(newEvents.map(Row.fromTuple), eventSchema)
 
-        writeAvroRecords(newPath, partitionId, buffer, wrapperSchema)
-        Iterator.empty
-      }.count()
+    modifiedDF
+      .write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("avro")
+      .save(s"$baseOutputPath/modified")
 
-    println("✅ Avro container files written with original schema.")
+    newDF
+      .write
+      .mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("avro")
+      .save(s"$baseOutputPath/new")
+
+    println(s"✅ Wrote Avro events: $baseOutputPath/modified and $baseOutputPath/new, partitioned with logical_date=$logicalDateStr and event_timestamp as top-level column!")
+
     spark.stop()
   }
 }
