@@ -1,11 +1,9 @@
 package rastest
 
 import org.apache.avro.Schema
-import org.apache.avro.generic.{GenericData, GenericDatumWriter, GenericRecord}
-import org.apache.avro.io.{DatumWriter, EncoderFactory}
+import org.apache.avro.generic.GenericRecord
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types._
-import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.io.Source
@@ -14,7 +12,7 @@ import scala.util.Random
 object PartitionedAvroEventProducerBatch {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("Partitioned Avro Event Producer (No Kafka, Aligned Schema)")
+      .appName("Partitioned Avro Event Producer (No Kafka, Fixed)")
       .master("local[*]")
       .getOrCreate()
     import spark.implicits._
@@ -82,7 +80,28 @@ object PartitionedAvroEventProducerBatch {
       wrapper
     }
 
-    // Modified customers
+    // Recursive converter from GenericRecord to Spark Row based on provided StructType
+    def avroRecordToSparkRow(record: GenericRecord, schema: StructType): Row = {
+      val values = schema.fields.map { field =>
+        val avroValue = record.get(field.name)
+        field.dataType match {
+          case st: StructType =>
+            if (avroValue == null) null else avroRecordToSparkRow(avroValue.asInstanceOf[GenericRecord], st)
+          case ArrayType(elemType, _) =>
+            if (avroValue == null) null
+            else avroValue.asInstanceOf[java.util.Collection[Any]].toArray.map {
+              case gr: GenericRecord => avroRecordToSparkRow(gr, elemType.asInstanceOf[StructType])
+              case other => other
+            }.toSeq
+          case _ => avroValue
+        }
+      }
+      Row.fromSeq(values)
+    }
+
+    val sparkAvroStruct = org.apache.spark.sql.avro.SchemaConverters.toSqlType(wrapperSchema).dataType.asInstanceOf[StructType]
+
+    // Create modified and new event groups
     val nModified = 16000
     val modifiedEvents = (1 to nModified).map { _ =>
       val customerId = customerIds(random.nextInt(customerIds.length))
@@ -91,7 +110,6 @@ object PartitionedAvroEventProducerBatch {
       buildEvent(customerId, eventType, partitionId, isNew = false)
     }
 
-    // New customers (multiple events per new customer)
     val nNewCustomers = 800
     val newEvents = (1 to nNewCustomers).flatMap { _ =>
       val partitionId = random.nextInt(8).toString
@@ -105,19 +123,20 @@ object PartitionedAvroEventProducerBatch {
       )
     }
 
-    val wrapperStructType = org.apache.spark.sql.avro.SchemaConverters.toSqlType(wrapperSchema).dataType.asInstanceOf[org.apache.spark.sql.types.StructType]
+    val allEvents = modifiedEvents ++ newEvents
+    val rddRows = spark.sparkContext.parallelize(allEvents).map(gr => avroRecordToSparkRow(gr, sparkAvroStruct))
+    val df = spark.createDataFrame(rddRows, sparkAvroStruct)
 
-    def writeAvro(events: Seq[GenericRecord], folderName: String): Unit = {
-      val rdd = spark.sparkContext.parallelize(events)
-      val df = spark.createDataFrame(rdd.map(Row(_)), StructType(Seq(StructField("event", wrapperStructType))))
-        .select("event.*") // explode struct columns
-      df.write.mode("overwrite").format("avro").save(s"$baseOutputPath/$folderName")
-    }
+    // Write Avro partitioned by tenant_id, partition_id, logical_date (extract from header fields)
+    df.withColumn("partition_id", substring_index(col("header.entity_id"), "_", 1))
+      .withColumn("tenant_id", col("header.tenant_id"))
+      .withColumn("logical_date", col("header.logical_date"))
+      .write.mode("overwrite")
+      .partitionBy("tenant_id", "partition_id", "logical_date")
+      .format("avro")
+      .save(baseOutputPath)
 
-    writeAvro(modifiedEvents, "modified")
-    writeAvro(newEvents, "new")
-
-    println(s"✅ Produced Avro events (modified & new) saved at $baseOutputPath")
+    println(s"✅ Events written as Avro files partitioned at $baseOutputPath")
 
     spark.stop()
   }
