@@ -1,44 +1,61 @@
 package rastest
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, Row}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import java.nio.file.{Paths, Files}
+import java.nio.charset.StandardCharsets
 
-object PartitionedAvroEventConsumerBatch {
+object PartitionedAvroEventFileConsumer {
+
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("Partitioned Avro Event Consumer (Batch, No Kafka)")
+      .appName("Partitioned Avro File Consumer")
       .master("local[*]")
       .getOrCreate()
 
-    val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
-    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
+    import spark.implicits._
 
-    // Read (union) both modified and new Avro event files written by the producer
-    val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
-    val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
-    val avroDF     = dfModified.unionByName(dfNew)
-
-    // Flatten (extract) header fields for partitioning and further usage
-    val parsed = avroDF.select(
-      col("header.tenant_id").as("tenant_id"),
-      col("header.entity_id").as("customer_id"),
-      col("header.event_timestamp").as("event_timestamp"),
-      col("header.logical_date").as("logical_date"),
-      col("header.event_type").as("event_type"),
-      // You may add other header/payload fields if needed
-      col("payload"),
-      // Partition id logic: get from customer id prefix (adjust as needed)
-      substring_index(col("header.entity_id"), "_", 1).as("partition_id")
+    // Input and output directories
+    val avroInputPath = "customer/avro_output"
+    val baseOutputPath = "customer/tenant_data"
+    val wrapperSchemaJson = new String(
+      Files.readAllBytes(Paths.get("src/main/avro/CustomerEvent.avsc")),
+      StandardCharsets.UTF_8
     )
 
-    // Write fully decoded data as Parquet, partitioned as required by your merge job
-    parsed.write
-      .mode("overwrite")
+    // Read Avro files written by producer
+    val inputDF = spark.read
+      .format("avro")
+      .load(avroInputPath)
+
+    // Deserialize payload using wrapper schema (via from_avro)
+    val df = inputDF
+      .withColumn("event", from_avro($"payload", wrapperSchemaJson))
+      .withColumn("customer_id", $"header.entity_id")
+      .withColumn("event_type", $"header.event_type")
+      .withColumn("logical_date", $"header.logical_date")
+      .withColumn("tenant_id", $"header.tenant_id")
+      .withColumn("partition_id", split($"customer_id", "_").getItem(0))
+      .withColumn("event_timestamp", $"header.event_timestamp")
+      .select(
+        $"partition_id",
+        $"tenant_id",
+        $"customer_id",
+        $"event_timestamp",
+        $"logical_date",
+        $"event_type",
+        $"payload" // original encoded payload
+      )
+
+    // Write output as partitioned Parquet in same structure
+    df.write
       .partitionBy("tenant_id", "partition_id", "logical_date")
       .format("parquet")
+      .mode("overwrite")
       .save(baseOutputPath)
 
-    println(s"✅ Avro events processed and written as Parquet partitions at $baseOutputPath")
+    println(s"✅ Consumer completed. Output saved to: $baseOutputPath")
     spark.stop()
   }
 }
