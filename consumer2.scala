@@ -1,13 +1,13 @@
 package rastest
 
-import org.apache.spark.sql.{SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.avro.Schema
 import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
-import org.apache.avro.generic.{GenericDatumWriter, GenericRecord}
+import org.apache.avro.generic.{GenericDatumWriter, GenericRecord, GenericData}
 import org.apache.avro.io.{BinaryEncoder, EncoderFactory}
 
 object PartitionedAvroEventFileConsumer {
@@ -29,18 +29,31 @@ object PartitionedAvroEventFileConsumer {
     )
     val wrapperSchema = new Schema.Parser().parse(wrapperSchemaStr)
 
+    // Read Avro files
     val inputDF = spark.read.format("avro").load(avroInputPath)
 
+    // Convert ByteBuffer to Array[Byte]
+    val dfWithPayloadBytes = inputDF.withColumn(
+      "payload_bytes",
+      col("payload").cast("binary") // cast ByteBuffer to binary type which maps to Array[Byte]
+    )
+
     // Re-serialize each full record as 'value' column
-    val encodedDF = inputDF.mapPartitions { iter =>
+    val encodedDF = dfWithPayloadBytes.mapPartitions { iter =>
       val writer = new GenericDatumWriter[GenericRecord](wrapperSchema)
       val factory = EncoderFactory.get()
 
       iter.map { row =>
-        val record = row.getValuesMap[Any](wrapperSchema.getFields.toArray.map(_.asInstanceOf[Schema.Field].name()))
+        // Build GenericRecord with updated payload as byte array wrapped to ByteBuffer again
         val genericRecord = new GenericData.Record(wrapperSchema)
         wrapperSchema.getFields.forEach { field =>
-          genericRecord.put(field.name(), record(field.name()))
+          // Handle payload field with ByteBuffer wrapped from Array[Byte]
+          if (field.name() == "payload") {
+            val payloadArr = row.getAs[Array[Byte]]("payload_bytes")
+            genericRecord.put(field.name(), ByteBuffer.wrap(payloadArr))
+          } else {
+            genericRecord.put(field.name(), row.getAs[Any](field.name()))
+          }
         }
 
         val out = new ByteArrayOutputStream()
@@ -55,8 +68,8 @@ object PartitionedAvroEventFileConsumer {
           row.getAs[Int]("header.logical_date"),
           row.getAs[String]("header.tenant_id"),
           row.getAs[Long]("header.event_timestamp"),
-          row.getAs[ByteBuffer]("payload"),
-          out.toByteArray // ← value for merge job
+          row.getAs[Array[Byte]]("payload_bytes"),
+          out.toByteArray // 'value' column for merge job compatibility
         )
       }
     }.toDF(
@@ -66,10 +79,10 @@ object PartitionedAvroEventFileConsumer {
       "tenant_id",
       "event_timestamp",
       "payload",
-      "value" // 👈 required for merge job compatibility
+      "value"
     ).withColumn("partition_id", split(col("customer_id"), "_").getItem(0))
 
-    // Write as partitioned Parquet
+    // Write output as partitioned Parquet files
     encodedDF.write
       .partitionBy("tenant_id", "partition_id", "logical_date")
       .format("parquet")
