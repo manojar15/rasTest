@@ -14,7 +14,7 @@ import scala.util.Random
 object PartitionedAvroEventProducerBatch {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("Partitioned Avro Event Producer (Faithful, No Kafka)")
+      .appName("Partitioned Avro Event Producer (No Kafka, Aligned Schema)")
       .master("local[*]")
       .getOrCreate()
     import spark.implicits._
@@ -24,23 +24,22 @@ object PartitionedAvroEventProducerBatch {
     val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
     val tenantId = 42
     val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
+    val random = new Random()
 
-    // Load Avro schemas
     val wrapperSchemaStr = Source.fromFile("src/main/avro/CustomerEvent.avsc").mkString
     val nameSchemaStr = Source.fromFile("src/main/avro/NamePayload.avsc").mkString
     val addressSchemaStr = Source.fromFile("src/main/avro/AddressPayload.avsc").mkString
     val idSchemaStr = Source.fromFile("src/main/avro/IdentificationPayload.avsc").mkString
+
     val wrapperSchema = new Schema.Parser().parse(wrapperSchemaStr)
     val headerSchema = wrapperSchema.getField("header").schema()
     val nameSchema = new Schema.Parser().parse(nameSchemaStr)
     val addressSchema = new Schema.Parser().parse(addressSchemaStr)
     val idSchema = new Schema.Parser().parse(idSchemaStr)
 
-    val customerIds = spark.read.parquet(customerMetaPath)
-      .select("customer_id").as[String].collect().toSeq
-    val random = new Random()
+    val customerIds = spark.read.parquet(customerMetaPath).select("customer_id").as[String].collect().toSeq
 
-    def buildEvent(customerId: String, eventType: String, partitionId: String, isNew: Boolean = false): GenericRecord = {
+    def buildEvent(customerId: String, eventType: String, partitionId: String, isNew: Boolean): GenericRecord = {
       val eventTimestamp = System.currentTimeMillis()
       val header = new GenericData.Record(headerSchema)
       header.put("event_timestamp", eventTimestamp)
@@ -79,20 +78,20 @@ object PartitionedAvroEventProducerBatch {
       val wrapper = new GenericData.Record(wrapperSchema)
       wrapper.put("header", header)
       wrapper.put("payload", payloadRecord)
+
       wrapper
     }
 
-    // Modified events (existing customers)
+    // Modified customers
     val nModified = 16000
     val modifiedEvents = (1 to nModified).map { _ =>
-      val idx = random.nextInt(customerIds.length)
-      val customerId = customerIds(idx)
+      val customerId = customerIds(random.nextInt(customerIds.length))
       val partitionId = customerId.split("_").headOption.getOrElse("0")
       val eventType = eventTypes(random.nextInt(eventTypes.length))
       buildEvent(customerId, eventType, partitionId, isNew = false)
     }
 
-    // New customers: each gets multiple events (NAME, ADDRESS, ADDRESS, ID, ID)
+    // New customers (multiple events per new customer)
     val nNewCustomers = 800
     val newEvents = (1 to nNewCustomers).flatMap { _ =>
       val partitionId = random.nextInt(8).toString
@@ -106,22 +105,20 @@ object PartitionedAvroEventProducerBatch {
       )
     }
 
-    val sparkAvroStruct = org.apache.spark.sql.avro.SchemaConverters.toSqlType(wrapperSchema).dataType.asInstanceOf[StructType]
+    val wrapperStructType = org.apache.spark.sql.avro.SchemaConverters.toSqlType(wrapperSchema).dataType.asInstanceOf[org.apache.spark.sql.types.StructType]
 
-    def writeDataset(events: Seq[GenericRecord], folder: String): Unit = {
+    def writeAvro(events: Seq[GenericRecord], folderName: String): Unit = {
       val rdd = spark.sparkContext.parallelize(events)
-      val df = spark.createDataFrame(rdd.map(Row(_)), StructType(Seq(StructField("event", sparkAvroStruct))))
-        .select("event.*") // explode struct so every field is a column (header, payload)
-      df.write
-        .mode("overwrite")
-        .format("avro")
-        .save(s"$baseOutputPath/$folder")
+      val df = spark.createDataFrame(rdd.map(Row(_)), StructType(Seq(StructField("event", wrapperStructType))))
+        .select("event.*") // explode struct columns
+      df.write.mode("overwrite").format("avro").save(s"$baseOutputPath/$folderName")
     }
 
-    writeDataset(modifiedEvents, "modified")
-    writeDataset(newEvents, "new")
+    writeAvro(modifiedEvents, "modified")
+    writeAvro(newEvents, "new")
 
-    println(s"✅ Modified and New customer events written (as Avro) in: $baseOutputPath/modified and $baseOutputPath/new")
+    println(s"✅ Produced Avro events (modified & new) saved at $baseOutputPath")
+
     spark.stop()
   }
 }
