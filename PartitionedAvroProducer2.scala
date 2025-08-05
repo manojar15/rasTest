@@ -9,7 +9,7 @@ import scala.io.Source
 
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, GenericDatumWriter}
-import org.apache.avro.io.EncoderFactory
+import org.apache.avro.io.{EncoderFactory}
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types._
 
@@ -24,8 +24,7 @@ object FileBasedAvroEventProducer {
     import spark.implicits._
 
     val tenantId = 42
-    val logicalDateStr = "2025-04-03"
-    val logicalDate = LocalDate.parse(logicalDateStr, DateTimeFormatter.ISO_DATE)
+    val logicalDate = LocalDate.parse("2025-04-03", DateTimeFormatter.ISO_DATE)
     val logicalDateDays = logicalDate.toEpochDay.toInt
     val eventTypes = Seq("NAME", "ADDRESS", "IDENTIFICATION")
     val outputPath = "customer/event_output"
@@ -42,24 +41,21 @@ object FileBasedAvroEventProducer {
     val addressSchema = new Schema.Parser().parse(addressSchemaStr)
     val idSchema = new Schema.Parser().parse(idSchemaStr)
 
-    // Load existing customer IDs
     val customerMetaPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_metadata"
-    val existingCustomerIds = spark.read.parquet(customerMetaPath)
+    val existingCustomers = spark.read.parquet(customerMetaPath)
       .select("customer_id").as[String].collect().toSet
-    val broadcastCustomerIds = spark.sparkContext.broadcast(existingCustomerIds.toIndexedSeq)
+    val broadcastExistingCustomers = spark.sparkContext.broadcast(existingCustomers.toIndexedSeq)
 
-    // Helper: serialize Avro GenericRecord to bytes
-    def serialize(avroSchema: Schema, record: GenericData.Record): Array[Byte] = {
-      val out = new ByteArrayOutputStream()
-      val encoder = EncoderFactory.get().binaryEncoder(out, null)
-      val writer = new GenericDatumWriter[GenericData.Record](avroSchema)
+    def serialize(schema: Schema, record: GenericData.Record): Array[Byte] = {
+      val baos = new ByteArrayOutputStream()
+      val encoder = EncoderFactory.get().binaryEncoder(baos, null)
+      val writer = new GenericDatumWriter[GenericData.Record](schema)
       writer.write(record, encoder)
       encoder.flush()
-      out.close()
-      out.toByteArray
+      baos.close()
+      baos.toByteArray
     }
 
-    // Generate serialized wrapped event bytes for a customer and event type
     def createWrappedEvent(customerId: String, eventType: String): Array[Byte] = {
       val header = new GenericData.Record(headerSchema)
       header.put("event_timestamp", System.currentTimeMillis())
@@ -94,7 +90,6 @@ object FileBasedAvroEventProducer {
           rec.put("issuer", "GovX")
           (idSchema, rec)
       }
-
       val payloadBytes = serialize(payloadSchema, payloadRecord)
       val wrapperRecord = new GenericData.Record(wrapperSchema)
       wrapperRecord.put("header", header)
@@ -103,52 +98,50 @@ object FileBasedAvroEventProducer {
       serialize(wrapperSchema, wrapperRecord)
     }
 
-    // RDD: 4M events for existing customers
-    val existingEventsRDD = spark.sparkContext.parallelize(1 to 4000000, 64).mapPartitions { iter =>
+    val existingEventsRDD = spark.sparkContext.parallelize(1 to 4000000, 64).mapPartitions { part =>
       val rnd = new Random()
-      val customers = broadcastCustomerIds.value
-      iter.map { _ =>
-        val custId = customers(rnd.nextInt(customers.size))
-        val evType = eventTypes(rnd.nextInt(eventTypes.size))
-        val value = createWrappedEvent(custId, evType)
+      val customers = broadcastExistingCustomers.value
+      part.map { _ =>
+        val custId = customers(rnd.nextInt(customers.length))
+        val evType = eventTypes(rnd.nextInt(eventTypes.length))
+        val valBytes = createWrappedEvent(custId, evType)
         val partitionId = custId.split("_")(0)
-        Row(custId, evType, tenantId, logicalDateDays, System.currentTimeMillis(), partitionId, value)
+        Row(custId, evType, tenantId, logicalDateDays, System.currentTimeMillis(), partitionId, valBytes)
       }
     }
 
-    // RDD: 500K new customers, 5 events each
     val newCustomersRDD = spark.sparkContext.parallelize(1 to 500000, 32).flatMap { _ =>
       val rnd = new Random()
       val partitionId = rnd.nextInt(8)
       val custId = f"${partitionId}_9${rnd.nextInt(999999)}%06d"
       Seq("NAME", "ADDRESS", "ADDRESS", "IDENTIFICATION", "IDENTIFICATION").map { evType =>
-        val value = createWrappedEvent(custId, evType)
-        Row(custId, evType, tenantId, logicalDateDays, System.currentTimeMillis(), partitionId.toString, value)
+        val valBytes = createWrappedEvent(custId, evType)
+        Row(custId, evType, tenantId, logicalDateDays, System.currentTimeMillis(), partitionId.toString, valBytes)
       }
     }
 
+    import org.apache.spark.sql.types._
+
     val schema = StructType(Seq(
-      StructField("customer_id", StringType, nullable = false),
-      StructField("event_type", StringType, nullable = false),
-      StructField("tenant_id", IntegerType, nullable = false),
-      StructField("logical_date", IntegerType, nullable = false),
-      StructField("event_timestamp", LongType, nullable = false),
-      StructField("partition_id", StringType, nullable = false),
-      StructField("value", BinaryType, nullable = false)
+      StructField("customer_id", StringType, false),
+      StructField("event_type", StringType, false),
+      StructField("tenant_id", IntegerType, false),
+      StructField("logical_date", IntegerType, false),
+      StructField("event_timestamp", LongType, false),
+      StructField("partition_id", StringType, false),
+      StructField("value", BinaryType, false)
     ))
 
-    // Union events
     val allEventsRDD = existingEventsRDD.union(newCustomersRDD)
 
     val eventsDF = spark.createDataFrame(allEventsRDD, schema)
 
-    eventsDF.write
+    // Write to disk; note logical_date is still integer here
+    eventsDF.write.mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
       .option("compression", "snappy")
-      .mode("overwrite")
-      .parquet(outputPath)
+      .parquet("customer/event_output")
 
-    println("✅ Event data successfully written as partitioned Parquet files.")
     spark.stop()
   }
 }
