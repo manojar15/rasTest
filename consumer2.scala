@@ -1,34 +1,33 @@
 package rastest
 
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 
-object PartitionedParquetConsumerAlignMerge {
-
+object FileBasedAvroEventConsumer {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("File-based Partitioned Parquet Consumer")
+      .appName("File-based Avro Event Consumer")
       .master("local[8]")
-      .config("spark.sql.shuffle.partitions", "64")
       .getOrCreate()
 
-    val inputPath = "customer/event_output" // Where the producer wrote events
-    val outputPath = "customer/tenant_data" // Where the merge job reads events (or update as needed)
+    val inputPath = "customer/event_output"
+    val outputPath = "customer/tenant_data"
 
-    // Read produced Parquet -- columns: customer_id, event_type, tenant_id, logical_date, event_timestamp, partition_id, value
-    val df = spark.read
-      .parquet(inputPath)
+    val df = spark.read.parquet(inputPath)
 
-    // Optionally: filter/transform here if needed (for most, just pass-through is fine)
+    // Convert integer logical_date (days since epoch) to string yyyy-MM-dd format for partitioning
+    val dfWithLogicalDateStr = df.withColumn(
+      "logical_date",
+      date_format(date_add(lit("1970-01-01"), col("logical_date")), "yyyy-MM-dd")
+    )
 
-    // Write exactly as merge job expects
-    df.write
+    // Write partitioned Parquet files with converted logical_date string
+    dfWithLogicalDateStr.write.mode("overwrite")
       .partitionBy("tenant_id", "partition_id", "logical_date")
       .option("compression", "snappy")
-      .mode("overwrite")
       .parquet(outputPath)
 
-    println(s"✅ Consumer wrote partitioned files for merge job to: $outputPath")
-
+    println(s"Consumer wrote data partitioned with string logical_date to $outputPath")
     spark.stop()
   }
 }
