@@ -2,7 +2,7 @@ package rastest
 
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.storage.StorageLevel
-import rastest.handlers.{AddressChangeHandler, DeltaEntry, EventHandler, IdentificationChangeHandler, NameUpdateHandler, UpdateOutput}
+import rastest.handlers._
 
 import java.io.File
 import java.nio.file.{Files, Paths}
@@ -23,7 +23,8 @@ object PartitionedCustomerMergeJob {
     val writeMode = if (args.length > 1) args(1) else "modified" // default: modified
     val produceCustomerUpdates = false
     val tenantDataPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
-    val snapshotPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/initial_customers_avro"
+    //val snapshotPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/initial_customers_avro"
+    val snapshotPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_snapshot_avro"
     val snapshotOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_snapshot_avro"
     val deltaCustomerPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_snapshot_delta"
     val deltaOutputPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customerupdates"

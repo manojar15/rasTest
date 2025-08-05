@@ -20,7 +20,8 @@ object PartitionedCustomerUpdatesJob {
     val date = Date.valueOf(logicalDate)
     val tenantId = if (args.length > 0) args(0) else "42"
     val tenantDataPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
-    val snapshotPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/initial_customers_avro"
+    //val snapshotPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/initial_customers_avro"
+    val snapshotPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_snapshot_avro"
     val deltaCustomerPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customer_snapshot_delta"
     val customerUpdateOutputPath = "file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/customerupdates"
 

@@ -1,9 +1,9 @@
 package rastest
 
+import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
-import java.time.LocalDate
-import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig}
+
 import java.util.Properties
 import scala.jdk.CollectionConverters._
 
@@ -16,8 +16,9 @@ object EventReconciliationJob {
 
     val kafkaBootstrap = "localhost:9092"
     val topic = "customer_events_partitioned_v2"
-    val logicalDate = args.headOption.getOrElse(LocalDate.now().toString)
-    val ingestedPath = s"file:///C:/Users/e5729817/workspaces/obrandrastest/customer/tenant_data/tenant_id=42/partition_id=*/logical_date=$logicalDate"
+    //val logicalDate = args.headOption.getOrElse(LocalDate.now().toString)
+    val logicalDate = "2025-04-03"
+    val ingestedPath = s"file:///C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data/tenant_id=42/partition_id=*/logical_date=$logicalDate"
 
     val df = spark.read.format("parquet").load(ingestedPath)
     val ingestedCount = df.count()

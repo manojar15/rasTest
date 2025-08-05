@@ -3,37 +3,36 @@ package rastest
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
-object PartitionedAvroEventConsumerBatch {
+object FileBasedAvroEventConsumer {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-      .appName("Partitioned Avro Event Consumer (Batch)")
+      .appName("File-based Avro Event Consumer")
       .master("local[*]")
       .getOrCreate()
 
-    val avroInputBase = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/avro_output"
-    val baseOutputPath = "C:/Users/e5655076/RAS_RPT/obrandrastest/customer/tenant_data"
+    val inputPath = "customer/event_output"    // Path where producer writes events
+    val outputPath = "customer/tenant_data"    // Path the merge job reads from
 
-    val dfModified = spark.read.format("avro").load(s"$avroInputBase/modified")
-    val dfNew      = spark.read.format("avro").load(s"$avroInputBase/new")
-    val avroDF     = dfModified.unionByName(dfNew)
+    // Read the producer output with logical_date as integer days since epoch
+    val df = spark.read.parquet(inputPath)
 
-    val parsed = avroDF.select(
-      col("partition_id"),
-      col("tenant_id"),
-      col("customer_id"),
-      col("event_timestamp"),
-      col("logical_date"),
-      col("event_type"),
-      col("payload_bytes").as("value")
+    // Convert logical_date from integer to string yyyy-MM-dd for partition folder naming
+    val dfWithLogicalDateStr = df.withColumn(
+      "logical_date_str",
+      date_format(date_add(lit("1970-01-01"), col("logical_date")), "yyyy-MM-dd")
     )
+    // Drop old integer logical_date and rename new string column to logical_date
+    val finalDF = dfWithLogicalDateStr.drop("logical_date")
+      .withColumnRenamed("logical_date_str", "logical_date")
 
-    parsed.write
-      .mode("overwrite")
+    // Write partitioned Parquet files using string formatted logical_date for folders like logical_date=2025-04-03
+    finalDF.write
       .partitionBy("tenant_id", "partition_id", "logical_date")
-      .format("parquet")
-      .save(baseOutputPath)
+      .option("compression", "snappy")
+      .mode("overwrite")
+      .parquet(outputPath)
 
-    println(s"✅ Avro events processed to Parquet partitions at $baseOutputPath")
+    println(s"✅ Consumer job wrote data partitioned by tenant_id, partition_id, logical_date (string) to $outputPath")
 
     spark.stop()
   }
