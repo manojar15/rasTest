@@ -1,0 +1,42 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, sum, min, to_date
+
+spark = SparkSession.builder.getOrCreate()
+
+# Sample data
+data = [
+    ("Alice", "2025-08-01", 1200),
+    ("Bob", "2025-08-01", 800),
+    ("Alice", "2025-08-02", 2300),
+    ("Bob", "2025-08-03", 1700),
+    ("Charlie", "2025-08-02", 1500),
+    ("Alice", "2025-08-04", 3000),
+    ("Charlie", "2025-08-05", 2000),
+    ("Bob", "2025-08-06", 4000),
+    ("Alice", "2025-08-06", 1800),
+    ("Charlie", "2025-08-07", 2700),
+    ("Bob", "2025-08-07", 2000),
+    ("Charlie", "2025-08-08", 1900),
+]
+
+df = spark.createDataFrame(data, ["name", "saledate", "amount"]).withColumn("saledate", to_date("saledate"))
+
+# Define window by name and ordered by date
+window_spec = Window.partitionBy("name").orderBy("saledate")
+
+# Cumulative sum of amount
+from pyspark.sql.functions import sum as _sum
+
+df_with_cumsum = df.withColumn("cum_sales", _sum("amount").over(window_spec))
+
+# Filter when cumulative sales crosses 10k
+reached_10k = df_with_cumsum.filter(col("cum_sales") >= 10000)
+
+# Get the earliest date when each person reached 10k
+first_10k_dates = reached_10k.groupBy("name").agg(min("saledate").alias("reached_10k_date"))
+
+# Find who reached first overall
+first_to_10k = first_10k_dates.orderBy("reached_10k_date").limit(1)
+
+first_to_10k.show()
