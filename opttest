@@ -1,79 +1,55 @@
-Do you want a single-block “copy-paste” version that stays very close to your original (no CTEs), but keeps the same optimizations? Here it is, formatted for easy copy.
-
-CREATE TEMPORARY TABLE ULR014_TEMP1 AS
+CREATE TEMPORARY TABLE ULR014_TEMP2 AS
 SELECT
-A.FULL_DATE,
-A.argblr_bill_status,
-A.argblr_bill_due_date,
-A.argblr_paid_date,
-A.AR_ID_ITEM AS LN_NBR,
-replace(concat_ws(',',
-NVL(E.NME_LNE,''),
-NVL(E.DEST_LINE1_HOME,''),
-NVL(E.DEST_LINE2_HOME,''),
-NVL(E.LOC_LINE1_HOME,''),
-NVL(E.LOC_CITY_HOME,''),
-NVL(E.LOC_STATE_HOME,''),
-NVL(E.LOC_POSTAL_CODE_HOME,'')
-),',,','') AS NME_ADDR,
-B.RACLR_INTRST_TYPE AS INT_TYP,
-B.ARBLR_CNTRCT_AMT AS ORG_LN_AMT,
-NVL(replace(datediff(to_date(NVL(A.argblr_bill_due_date,' ')), to_date(NVL(A.argblr_paid_date,' '))),'-',''),' ') AS DYS_PD_AHD,
-C.OTSNDG_PRNCPL_BAL AS PRIN_BAL,
-B.IP_ID_PRMRY AS CUST_NBR,
-B.ENART_VALUE AS PROC_TYP,
-CASE WHEN D.CNTRT_CODE IN ('NoOfExtsnsForDlqcyPayment','NoOfExtsnsForDelinquency','NoOfExtsnsForPromotional','NoOfExtsnsForPymntDueDateChange')
-AND D.CNPT_VALUE = 'LifeToDate' THEN D.AACPTL_CNTR ELSE '' END AS DQ_EXT_NBR_MOS,
-C.LTCHG_RCVBL AS LTE_CHRGS_DUE,
-B.APADL_VALUE AS PROC_STAT,
-C.TOTAL_FEE_RCVBL AS FEES_DUE,
-CASE WHEN E.home_phnbr IS NOT NULL THEN E.home_phnbr ELSE E.mobile_phnbr END AS PRI_PHN_EXT,
-A.ARGBLR_BILL_AMT AS PMT_AMT,
-concat(10,'-',case when cntrt_code = 'TimesPastDue1' AND cnpt_value = 'LifeToDate' then aacptl_cntr else 0 end ) as cnt_1,
-concat(20,'-',case when cntrt_code = 'TimesPastDue2' AND cnpt_value = 'LifeToDate' then aacptl_cntr else 0 end ) as cnt_2,
-concat(30,'-',case when cntrt_code = 'TimesPastDue3' AND cnpt_value = 'LifeToDate' then aacptl_cntr else 0 end ) as cnt_3,
-concat(60,'-',case when cntrt_code = 'TimesPastDue4' AND cnpt_value = 'LifeToDate' then aacptl_cntr else 0 end ) as cnt_4,
-concat(90,'-',case when cntrt_code = 'TimesPastDue5' AND cnpt_value = 'LifeToDate' then aacptl_cntr else 0 end ) as cnt_5,
-E.business_phnbr AS BUS_PHN_EXT,
-NVL(cast((from_unixtime(unix_timestamp(cast(A.argblr_paid_date as date)), 'MM-dd-yyyy')) as string),'') AS PD_DTE,
-B.AR_ID_ITEM_ORG_UNIT AS BRNCH,
-NVL(cast((from_unixtime(unix_timestamp(cast(C.PAST_DUE_DATE as date)), 'MM-dd-yyyy')) as string),'') AS OLD_DUE_DTE,
-B.APD_CODE AS PROD_CDE,
-B.APD_NAME AS PROD_NME,
-A.LDBID as LDBID,
-B.AR_ID_ITEM_OU_SERV as AR_ID_ITEM_OU_SERV
-FROM
-(
-SELECT
-FULL_DATE,
-argblr_bill_status,
-argblr_bill_due_date,
-argblr_paid_date,
-AR_ID_ITEM,
-ARGBLR_BILL_AMT,
+LN_NBR,
+NME_ADDR,
+INT_TYP,
+ORG_LN_AMT,
+DYS_PD_AHD,
+PRIN_BAL,
+CUST_NBR,
+PROC_TYP,
+CAST(SUM(DQ_EXT_NBR_MOS) AS INT) AS DQ_EXT_NBR_MOS,
+LTE_CHRGS_DUE,
+PROC_STAT,
+FEES_DUE,
+PRI_PHN_EXT,
+PMT_AMT,
+CONCAT_WS(',', COLLECT_SET(CONCAT_WS(',', cnt_1, cnt_2, cnt_3, cnt_4, cnt_5))) AS CREDIT_HIST,
+BUS_PHN_EXT,
+PD_DTE,
+BRNCH,
+OLD_DUE_DTE,
+PROD_CDE,
+PROD_NME,
 LDBID
-FROM uat7400_racs11.RT_AR_GEN_BILL_HIST_LN_RL
-WHERE argblr_bill_status = 'Paid'
-AND argblr_bill_due_date > argblr_paid_date
-AND argblr_paid_date BETWEEN '2025-07-28' AND '2025-07-28'
-) A
-LEFT JOIN uat7400_racs11.RT_APD_AR_MSTR_LN_RL B
-ON A.AR_ID_ITEM=B.AR_ID_ITEM AND A.LDBID=B.LDBID
-LEFT JOIN
+FROM ULR014_TEMP1
+WHERE
 (
-SELECT C1.*
-FROM uat7400_racs11.RT_AR_DLY_BAL_LN_RL C1
-JOIN (SELECT MAX(FULL_DATE) AS FULL_DATE FROM uat7400_racs11.RT_AR_DLY_BAL_LN_RL) C2
-ON C1.FULL_DATE = C2.FULL_DATE
-) C
-ON A.AR_ID_ITEM=C.AR_ID_ITEM AND A.LDBID=C.LDBID
-LEFT JOIN
-(
-SELECT D1.*
-FROM uat7400_racs11.TB_APD_AR_CNTR_PERIOD_LN_RL D1
-JOIN (SELECT MAX(FULL_DATE) AS FULL_DATE FROM uat7400_racs11.TB_APD_AR_CNTR_PERIOD_LN_RL) D2
-ON D1.FULL_DATE = D2.FULL_DATE
-) D
-ON A.AR_ID_ITEM=D.ARID_ITEM AND A.LDBID=D.LDBID
-LEFT JOIN uat7400_racs11.TB_CUST_MSTR_IP E
-ON B.IP_ID_PRMRY=E.EC_IP_ID AND B.LDBID=E.LDBID;
+'7400' = '99999998'
+OR array_contains(SPLIT('7400', ','), COALESCE(CAST(LDBID AS STRING), ''))
+)
+AND (
+'99999998' = '99999998'
+OR array_contains(SPLIT('99999998', ','), COALESCE(CAST(AR_ID_ITEM_OU_SERV AS STRING), ''))
+)
+GROUP BY
+LN_NBR,
+NME_ADDR,
+INT_TYP,
+ORG_LN_AMT,
+DYS_PD_AHD,
+PRIN_BAL,
+CUST_NBR,
+PROC_TYP,
+LTE_CHRGS_DUE,
+PROC_STAT,
+FEES_DUE,
+PRI_PHN_EXT,
+PMT_AMT,
+BUS_PHN_EXT,
+PD_DTE,
+BRNCH,
+OLD_DUE_DTE,
+PROD_CDE,
+PROD_NME,
+LDBID;
