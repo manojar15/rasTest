@@ -18,7 +18,7 @@ WHERE FULL_DATE = '20250728'
 AND STLR_STMNT_TYPE = 'DetailedStatement'
 AND enart_value LIKE '%LineOfCredit%'
 ),
--- Postal addresses: pick latest per ec_ip_id/PSTL_ADDR_TYP/ENT_POC_SEQ_NBR with seasonal and active-date logic
+-- Postal addresses filtered at as-of date (or seasonal window)
 IP_POC_BASE AS (
 SELECT
 addr.ec_ip_id,
@@ -82,7 +82,7 @@ PSTL_ADDR_FRMT_NME,
 mlng_cde
 FROM IP_POC_BASE
 ),
--- Emails: pick latest per ec_ip_id/EMAIL_TYP/ENT_POC_SEQ_NBR at/around date
+-- Emails filtered at as-of date window
 IP_EMAIL_BASE AS (
 SELECT
 eml.ec_ip_id,
@@ -115,7 +115,7 @@ ORDER BY full_date DESC, CAST(strt_dte AS DATE) DESC
 ) AS lst
 FROM IP_EMAIL_BASE
 ),
--- Communication preferences (DetailedStatement), latest per ec_ip_id/method/ar_id
+-- Communication preferences (DetailedStatement)
 IP_AR_PREF AS (
 SELECT
 ec_ip_id,
@@ -131,7 +131,7 @@ FROM uat7400_racs11.TB_11915_IP_AR_RLTNP_CMMN_PREF_OCCR_EC
 WHERE IP_AR_RLT_COMM_PREF_VAL = 'DetailedStatement'
 AND actn_ind <> 'Delete'
 ),
--- Preferred email for DetailedStatement from 11916, with latest email address per key
+-- Preferred email address per 11916 and latest address per type/seq
 IP_AR_EMAIL AS (
 SELECT DISTINCT
 P11916.ec_ip_id,
@@ -159,7 +159,7 @@ AND P11916.elctr_msg_ntfn_meth = 'Email'
 AND P11916.alt_prfrd_email_seq_nbr = 1
 AND P11916.actn_ind <> 'Delete'
 ),
--- Preferred text message phone for DetailedStatement from 11916, with latest phone per key
+-- Preferred text message phone per 11916 and latest phone per type/seq
 IP_AR_TEXTMSG AS (
 SELECT DISTINCT
 P11916.ec_ip_id,
@@ -186,7 +186,7 @@ AND P11916.elctr_msg_ntfn_meth = 'Text Message'
 AND P11916.alt_prfrd_txt_msg_seq_nbr = 1
 AND P11916.actn_ind <> 'Delete'
 ),
--- Latest postal address preference per ec_ip_id/ar_id by date rules
+-- Latest postal address preference per Account
 IP_AR_PSTL_PREF AS (
 SELECT
 ec_ip_id,
@@ -201,7 +201,7 @@ FROM uat7400_racs11.TB_11926_IP_AR_RLTNP_PSTL_ADDR_PREF_EC
 WHERE CAST(REPLACE(prf_strt_dte,'-','') AS INT) <= CAST('20250728' AS INT)
 AND actn_ind <> 'Delete'
 ),
--- Latest global IP preferred postal address
+-- Latest IP-level postal preference
 IP_PREF_POC AS (
 SELECT
 ec_ip_id,
@@ -218,7 +218,7 @@ FROM uat7400_racs11.TB_11430_IP_PREF_POC_EC
 WHERE CAST(REPLACE(prf_strt_dte,'-','') AS INT) <= CAST('20250728' AS INT)
 AND actn_ind <> 'Delete'
 ),
--- Latest global IP preferred email type/seq (if present)
+-- Latest IP-level email preference (non-null)
 IP_PREF_EMAIL AS (
 SELECT
 ec_ip_id,
@@ -234,7 +234,7 @@ AND actn_ind <> 'Delete'
 AND PRFRD_EMAIL_TYP IS NOT NULL
 AND PRFRD_EMAIL_TYP <> ''
 ),
--- Single-record fallbacks
+-- Fallback single-record helpers (when only one record exists)
 IP_POC_SINGLE AS (
 SELECT
 ec_ip_id,
@@ -255,7 +255,7 @@ FROM IP_EMAIL
 
 SELECT DISTINCT
 'TRN' AS REC_TYP,
-(driving_table.ar_id_item || '-' || 'DetailedLOCStatement') AS FILTER_VAL,
+(DRIVING_TABLE.ar_id_item || '-' || 'DetailedLOCStatement') AS FILTER_VAL,
 (DRIVING_TABLE.ar_id_item || '-' || DRIVING_TABLE.IP_ID) AS accnt_nmbr,
 DRIVING_TABLE.ADT_MSG_UUID AS uuid,
 1 AS sort_order,
@@ -268,20 +268,21 @@ DRIVING_TABLE.STLR_STMNT_TYPE AS Form/Letter Type,
 DRIVING_TABLE.STLR_STMNT_ISSUED_DATE AS System Processing Date,
 TB_IP_ID_MSTR.EC_IP_ID AS Customer Number,
 TB_IP_ID_MSTR.NME_LNE AS Full Legal Name OF Customer,
+
 IF(locate('|', regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|')) > 0,
 IF(LENGTH(split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|')) > 60,
 SUBSTR(split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|'), 1, 60),
-split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|')
-),
+split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|')),
 SUBSTR(LN_SNAP.APAT_VALUE_TITLE1, 1, 60)
 ) AS Primary Title ON Account,
+
 IF(locate('|', regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|')) > 0,
 IF(LENGTH(split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|')) > 60,
 SUBSTR(split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|'), 1, 60),
-split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|')
-),
+split(regexp_replace(LN_SNAP.APAT_VALUE_TITLE1, '\n', '\|'), '\|')),
 SUBSTR(LN_SNAP.APAT_VALUE_TITLE1, 61, 60)
 ) AS Secondary Title ON Account,
+
 COALESCE(IP_POC.PAL6_DSTN_LNE1, IP_POC_1.PAL6_DSTN_LNE1, TB_IP_ID_MSTR.DEST_LNE_TXT1, '') AS Address Line 1,
 COALESCE(IP_POC.PAL7_DSTN_LNE2, IP_POC_1.PAL7_DSTN_LNE2, TB_IP_ID_MSTR.DEST_LNE_TXT2, '') AS Address Line 2,
 COALESCE(IP_POC.PAL8_DSTN_LNE3, IP_POC_1.PAL8_DSTN_LNE3, TB_IP_ID_MSTR.DEST_LNE_TXT3, '') AS Address Line 3,
@@ -289,14 +290,17 @@ COALESCE(IP_POC.PAL8_DSTN_LNE3, IP_POC_1.PAL8_DSTN_LNE3, TB_IP_ID_MSTR.DEST_LNE_
 COALESCE(IP_POC.LCT1_CITY, IP_POC_1.LCT1_CITY, TB_IP_ID_MSTR.LOC_CITY, '') AS City,
 SUBSTRING(COALESCE(IP_POC.LCT2_ST, IP_POC_1.LCT2_ST, TB_IP_ID_MSTR.LOC_STATE, ''), 1, 2) AS State,
 COALESCE(IP_POC.LCT3_PSTL_CDE, IP_POC_1.LCT3_PSTL_CDE, TB_IP_ID_MSTR.LOC_PSTL_CODE, '') AS Zip Code,
+
 DRIVING_TABLE.AR_ID_ITEM AS Account Number,
 '' AS OMR Glyph Code FROM DocuCorp,
+
 COALESCE(
 IF(IP_POC.ec_ip_id IS NULL, NULL, IF(IP_POC.PSTL_ADDR_FRMT_NME = 'US Domestic', IP_POC.PSTL_ADDR_FRMT_NME, IP_POC.LCT6_CNTRY)),
 IF(IP_POC_1.ec_ip_id IS NULL, NULL, IF(IP_POC_1.PSTL_ADDR_FRMT_NME = 'US Domestic', IP_POC_1.PSTL_ADDR_FRMT_NME, IP_POC_1.LCT6_CNTRY)),
 IF(TB_IP_ID_MSTR.PSTL_ADDR_FRMT_NME = 'US Domestic', TB_IP_ID_MSTR.PSTL_ADDR_FRMT_NME, TB_IP_ID_MSTR.LOC_CNTRY),
 ''
 ) AS Country Code,
+
 CASE
 WHEN (COALESCE(IP_POC.PSTL_ADDR_FRMT_NME, IP_POC_1.PSTL_ADDR_FRMT_NME, TB_IP_ID_MSTR.PSTL_ADDR_FRMT_NME) = 'US Domestic'
 OR COALESCE(IP_POC.LCT6_CNTRY, IP_POC_1.LCT6_CNTRY, TB_IP_ID_MSTR.LOC_CNTRY) = 'US') THEN '0'
@@ -304,10 +308,132 @@ WHEN (COALESCE(IP_POC.PSTL_ADDR_FRMT_NME, IP_POC_1.PSTL_ADDR_FRMT_NME, TB_IP_ID_
 AND COALESCE(IP_POC.LCT6_CNTRY, IP_POC_1.LCT6_CNTRY, TB_IP_ID_MSTR.LOC_CNTRY) IS NULL) THEN ' '
 ELSE '1'
 END AS Non-US Country,
+
 COALESCE(IP_POC.MLNG_CDE, IP_POC_1.MLNG_CDE, TB_IP_ID_MSTR.MLNG_CDE) AS Customer Mail Flag,
 LN_SNAP.AR_ID_ITEM_ORG_UNIT AS Branch OF Ownership OF Account,
+
 CASE
 WHEN STLR_STMNT_TYPE = 'DetailedStatement' AND arir_comm_mode = 'SecureEMessage' AND ntfn_mode LIKE '%Email%'
+THEN COALESCE(IP_AR_EMAIL.EMAIL_ADDR, IP_EMAIL.EMAIL_ADDR, IP_EMAIL_1.EMAIL_ADDR, TB_IP_ID_MSTR.PRMRY_EMAIL_ADDR, '')
+ELSE COALESCE(IP_EMAIL.EMAIL_ADDR, IP_EMAIL_1.EMAIL_ADDR, TB_IP_ID_MSTR.PRMRY_EMAIL_ADDR, '')
+END AS Electronic Mail,
+
+IF(
+(
+(IP_AR_PREF_D.ec_ip_id IS NOT NULL AND IP_AR_PREF_D.PRFRD_COMM_METH = 'Direct Mail')
+OR (IP_AR_PREF_D.ec_ip_id IS NULL AND (TB_IP_ID_MSTR.EC_IP_ID IS NOT NULL AND TB_IP_ID_MSTR.DOC_DLVRY_PREF IN ('Paper and Electronic','Paper')))
+OR (IP_AR_PREF_D.ec_ip_id IS NULL AND TB_IP_ID_MSTR.EC_IP_ID IS NULL AND DRIVING_TABLE.ARIR_COMM_MODE = 'Mail')
+),
+'1','0'
+) AS Paper Indicator,
+
+IF(
+(
+(IP_AR_PREF_S.ec_ip_id IS NOT NULL AND IP_AR_PREF_S.PRFRD_COMM_METH = 'Secure E-Message')
+OR (IP_AR_PREF_S.ec_ip_id IS NULL AND (TB_IP_ID_MSTR.EC_IP_ID IS NOT NULL AND TB_IP_ID_MSTR.DOC_DLVRY_PREF IN ('Paper and Electronic','Electronic')))
+OR (IP_AR_PREF_S.ec_ip_id IS NULL AND TB_IP_ID_MSTR.EC_IP_ID IS NULL AND DRIVING_TABLE.ARIR_COMM_MODE = 'Email')
+),
+'1','0'
+) AS Secure E-MESSAGE Indicator,
+
+CASE
+WHEN STLR_STMNT_TYPE = 'DetailedStatement' AND arir_comm_mode = 'SecureEMessage' AND ntfn_mode LIKE '%SMS%'
+THEN COALESCE(IP_AR_TEXTMSG.ful_tele_nbr, '')
+ELSE ''
+END AS Text Enabled Phone Number,
+
+CASE
+WHEN DRIVING_TABLE.NTFN_MODE = 'SMS' THEN 'Text'
+WHEN DRIVING_TABLE.NTFN_MODE = 'Email' THEN 'Email'
+WHEN DRIVING_TABLE.NTFN_MODE = 'Email, SMS' THEN 'Email, Text'
+END AS Secure E MESSAGE Indicator Notification Method Indicator
+
+FROM DRIVING_TABLE
+
+LEFT JOIN uat7400_racs11.TB_ORG_UNIT_MSTR_EO ORG_SNAP
+ON CAST(DRIVING_TABLE.LDBID AS VARCHAR(10)) = ORG_SNAP.LDBID
+AND ORG_SNAP.OU_TYP IN ('Financial Entity')
+
+LEFT JOIN uat7400_racs11.TB_CUST_MSTR_IP TB_IP_ID_MSTR
+ON DRIVING_TABLE.IP_ID = TB_IP_ID_MSTR.EC_IP_ID
+
+LEFT JOIN uat7400_racs11.RT_APD_AR_MSTR_LN_RL LN_SNAP
+ON LN_SNAP.AR_ID_ITEM = DRIVING_TABLE.AR_ID_ITEM
+
+LEFT JOIN uat7400_racs11.TB_ORG_UNIT_MSTR_EO ORG_SNAP_LE
+ON CAST(DRIVING_TABLE.LDBID AS VARCHAR(10)) = ORG_SNAP_LE.LDBID
+AND LN_SNAP.AR_ID_ITEM_ORG_UNIT = ORG_SNAP_LE.OU_ID
+
+LEFT JOIN IP_AR_PREF IP_AR_PREF_D
+ON DRIVING_TABLE.IP_ID = IP_AR_PREF_D.ec_ip_id
+AND DRIVING_TABLE.AR_ID_ITEM = IP_AR_PREF_D.ar_id
+AND IP_AR_PREF_D.lst = 1
+AND IP_AR_PREF_D.PRFRD_COMM_METH = 'Direct Mail'
+
+LEFT JOIN IP_AR_PREF IP_AR_PREF_S
+ON DRIVING_TABLE.IP_ID = IP_AR_PREF_S.ec_ip_id
+AND DRIVING_TABLE.AR_ID_ITEM = IP_AR_PREF_S.ar_id
+AND IP_AR_PREF_S.lst = 1
+AND IP_AR_PREF_S.PRFRD_COMM_METH = 'Secure E-Message'
+
+LEFT JOIN IP_AR_PSTL_PREF IP_AR_PSTL
+ON DRIVING_TABLE.IP_ID = IP_AR_PSTL.ec_ip_id
+AND DRIVING_TABLE.AR_ID_ITEM = IP_AR_PSTL.ar_id
+AND IP_AR_PSTL.lst = 1
+
+LEFT JOIN IP_PREF_POC IP_PREF
+ON DRIVING_TABLE.IP_ID = IP_PREF.ec_ip_id
+AND IP_PREF.lst = 1
+
+LEFT JOIN IP_POC
+ON IP_POC.ec_ip_id = DRIVING_TABLE.IP_ID
+AND LOWER(IP_POC.PSTL_ADDR_TYP) = LOWER(COALESCE(IP_AR_PREF_D.ALT_PRFRD_PSTL_ADDR_TYP, IP_AR_PSTL.PRFRD_PSTL_ADDR_TYP, IP_PREF.PRFRD_PSTL_ADDR_TYP, ''))
+AND IP_POC.ENT_POC_SEQ_NBR = COALESCE(IP_AR_PREF_D.ALT_PRFRD_PSTL_ADDR_SEQ_NBR, IP_AR_PSTL.PRFRD_PSTL_ADDR_SEQ_NBR, IP_PREF.PRFRD_PSTL_ADDR_SEQ_NBR, '')
+AND IP_POC.lst_rec = 1
+
+LEFT JOIN IP_POC_SINGLE IP_POC_1
+ON IP_POC_1.ec_ip_id = DRIVING_TABLE.IP_ID
+AND IP_POC_1.ec_ip_id_cnt = 1
+
+LEFT JOIN (
+SELECT
+ec_ip_id,
+ar_id,
+PRFRD_EMAIL_TYP,
+PRFRD_EMAIL_SEQ_NBR,
+ROW_NUMBER() OVER (
+PARTITION BY ec_ip_id, ar_id
+ORDER BY full_date DESC, CAST(REPLACE(prf_strt_dte,'-','') AS INT) DESC
+) AS lst
+FROM uat7400_racs11.TB_11924_IP_AR_RLTNP_EMAIL_PREF_EC
+WHERE CAST(REPLACE(prf_strt_dte,'-','') AS INT) <= CAST('20250728' AS INT)
+AND actn_ind <> 'Delete'
+) IP_AR_EMAIL_PREF
+ON DRIVING_TABLE.IP_ID = IP_AR_EMAIL_PREF.ec_ip_id
+AND DRIVING_TABLE.AR_ID_ITEM = IP_AR_EMAIL_PREF.ar_id
+AND IP_AR_EMAIL_PREF.lst = 1
+
+LEFT JOIN IP_PREF_EMAIL IP_PREF_EML
+ON DRIVING_TABLE.IP_ID = IP_PREF_EML.ec_ip_id
+AND IP_PREF_EML.lst = 1
+
+LEFT JOIN IP_EMAIL
+ON IP_EMAIL.ec_ip_id = DRIVING_TABLE.IP_ID
+AND COALESCE(IP_AR_EMAIL_PREF.PRFRD_EMAIL_TYP, IP_PREF_EML.PRFRD_EMAIL_TYP, '') = IP_EMAIL.EMAIL_TYP
+AND COALESCE(IP_AR_EMAIL_PREF.PRFRD_EMAIL_SEQ_NBR, IP_PREF_EML.PRFRD_EMAIL_SEQ_NBR, '') = IP_EMAIL.ENT_POC_SEQ_NBR
+AND IP_EMAIL.lst = 1
+
+LEFT JOIN IP_EMAIL_SINGLE IP_EMAIL_1
+ON IP_EMAIL_1.ec_ip_id = DRIVING_TABLE.AR_ID_ITEM
+AND IP_EMAIL_1.ec_ip_id_cnt = 1
+
+LEFT JOIN IP_AR_EMAIL
+ON IP_AR_EMAIL.ec_ip_id = DRIVING_TABLE.IP_ID
+AND IP_AR_EMAIL.ar_id = DRIVING_TABLE.AR_ID_ITEM
+
+LEFT JOIN IP_AR_TEXTMSG
+ON IP_AR_TEXTMSG.ec_ip_id = DRIVING_TABLE.IP_ID
+AND IP_AR_TEXTMSG.ar_id = DRIVING_TABLE.AR_ID_ITEMde = 'SecureEMessage' AND ntfn_mode LIKE '%Email%'
 THEN COALESCE(IP_AR_EMAIL.EMAIL_ADDR, IP_EMAIL.EMAIL_ADDR, IP_EMAIL_1.EMAIL_ADDR, TB_IP_ID_MSTR.PRMRY_EMAIL_ADDR, '')
 ELSE COALESCE(IP_EMAIL.EMAIL_ADDR, IP_EMAIL_1.EMAIL_ADDR, TB_IP_ID_MSTR.PRMRY_EMAIL_ADDR, '')
 END AS Electronic Mail,
