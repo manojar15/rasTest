@@ -1,33 +1,63 @@
-WITH CREDIT_LINE_SUMMARY AS (
+WITH base_data AS (
   SELECT 
-    t.ar_id_item, 
-    get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].apr')) AS apr, 
-    get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].fnceChrg')) AS fnceChrg, 
-    get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].frmDte')) AS frmDte, 
-    get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].perdcRte')) AS perdcRte, 
-    get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].prinOutstdBal')) AS prinOutstdBal, 
-    get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].toDte')) AS toDte 
-  FROM uat7400_racs11.RT_AR_STMNT_CR_LINE_SMRY_LN_RL t 
-  LATERAL VIEW posexplode(split(get_json_object(t.stcls_cr_line_sumry, '$.arStmtCrLineSumm[*]/'), '","')) e AS i, x 
-  WHERE t.full_date = '20250728'
-    AND get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].apr')) <> ''
-) 
-SELECT DISTINCT 
-  '792' AS `REC_TYP`, 
-  (DRIVING_TABLE.ar_id_item||'-'||'DetailedLOCStatement') AS FILTER_VAL, 
-  1 AS `sort_order`, 
-  '792' AS `sort_order_1`, 
-  (DRIVING_TABLE.ar_id_item ||'-' ||DRIVING_TABLE.IP_ID) AS `accnt_nmbr`, 
-  DRIVING_TABLE.ADT_MSG_UUID AS `uuid`, 
-  DRIVING_TABLE.AR_ID_ITEM AS `Account Number`, 
-  REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.apr, CAST(0 AS BIGINT)) AS NUMERIC(14, 10)), '.', '') AS `APR`, 
-  REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.fnceChrg, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS `Finance Charge`, 
-  CREDIT_LINE_SUMMARY.frmDte AS `From Date`, 
-  CREDIT_LINE_SUMMARY.toDte AS `To Date`, 
-  REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.perdcRte, CAST(0 AS BIGINT)) AS NUMERIC(14, 10)), '.', '') AS `Periodic Rate`, 
-  REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.prinOutstdBal, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS `Principal Outstanding Balance` 
-FROM uat7400_racs11.RT_AR_STMNT_LN_RL DRIVING_TABLE 
-INNER JOIN CREDIT_LINE_SUMMARY ON DRIVING_TABLE.AR_ID_ITEM = CREDIT_LINE_SUMMARY.AR_ID_ITEM 
-WHERE DRIVING_TABLE.FULL_DATE = '20250728' 
-  AND DRIVING_TABLE.STLR_STMNT_TYPE = 'DetailedStatement' 
+    ARID_ITEM,
+    BALTT_CODE,
+    AABPTL_AMT,
+    SUBSTRING(AABPTL_END_DATE, 1, 4) AS end_year
+  FROM uat7400_racs11.TB_APD_AR_BAL_PERIOD_LN_RL
+  WHERE AABPTL_VALUE = 'Yearly'
+    AND SUBSTRING(AABPTL_END_DATE, 1, 4) IN ('2025', '2024')
+    AND BALTT_CODE IN ('TotalFeeCollected', 'TotalInterestCollected')
+),
+TOT_FEES_YTD AS (
+  SELECT ARID_ITEM, AABPTL_AMT
+  FROM base_data
+  WHERE BALTT_CODE = 'TotalFeeCollected'
+    AND end_year = '2025'
+),
+TOT_INT_YTD AS (
+  SELECT ARID_ITEM, AABPTL_AMT
+  FROM base_data
+  WHERE BALTT_CODE = 'TotalInterestCollected'
+    AND end_year = '2025'
+),
+TOT_FEES_PREV_YTD AS (
+  SELECT ARID_ITEM, AABPTL_AMT
+  FROM base_data
+  WHERE BALTT_CODE = 'TotalFeeCollected'
+    AND end_year = '2024'
+),
+TOT_INT_PREV_YTD AS (
+  SELECT ARID_ITEM, AABPTL_AMT
+  FROM base_data
+  WHERE BALTT_CODE = 'TotalInterestCollected'
+    AND end_year = '2024'
+)
+SELECT DISTINCT
+  '791' AS `REC_TYP`,
+  (DRIVING_TABLE.ar_id_item||'-'||'DetailedLOCStatement') AS FILTER_VAL,
+  1 AS `sort_order`,
+  '791' AS `sort_order_1`,
+  (DRIVING_TABLE.ar_id_item||'-'||DRIVING_TABLE.IP_ID) AS `accnt_nmbr`,
+  DRIVING_TABLE.ADT_MSG_UUID AS `uuid`,
+  '' AS `Over Limit Amount`,
+  '' AS `Resolved Amount`,
+  '' AS `VAT Total for Period`,
+  '' AS `Capitalized Interest at Billing`,
+  REPLACE(CAST(COALESCE(TOT_FEES_YTD.AABPTL_AMT, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS `Total Fees Assessed YTD`,
+  REPLACE(CAST(COALESCE(TOT_INT_YTD.AABPTL_AMT, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS `Total Interest Earned YTD`,
+  REPLACE(CAST(COALESCE(TOT_FEES_PREV_YTD.AABPTL_AMT, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS `Total Fees Assessed Previous YTD`,
+  REPLACE(CAST(COALESCE(TOT_INT_PREV_YTD.AABPTL_AMT, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS `Total Interest Earned Previous YTD`
+FROM uat7400_racs11.RT_AR_STMNT_LN_RL DRIVING_TABLE
+LEFT JOIN TOT_FEES_YTD
+  ON DRIVING_TABLE.AR_ID_ITEM = TOT_FEES_YTD.ARID_ITEM
+LEFT JOIN TOT_INT_YTD
+  ON DRIVING_TABLE.AR_ID_ITEM = TOT_INT_YTD.ARID_ITEM
+LEFT JOIN TOT_FEES_PREV_YTD
+  ON DRIVING_TABLE.AR_ID_ITEM = TOT_FEES_PREV_YTD.ARID_ITEM
+LEFT JOIN TOT_INT_PREV_YTD
+  ON DRIVING_TABLE.AR_ID_ITEM = TOT_INT_PREV_YTD.ARID_ITEM
+WHERE
+  DRIVING_TABLE.FULL_DATE = '20250728'
+  AND DRIVING_TABLE.STLR_STMNT_TYPE = 'DetailedStatement'
   AND DRIVING_TABLE.enart_value LIKE '%LineOfCredit%';
