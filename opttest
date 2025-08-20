@@ -10,11 +10,7 @@ get_json_object(stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].toDte
 FROM uat7400_racs11.RT_AR_STMNT_CR_LINE_SMRY_LN_RL t
 LATERAL VIEW posexplode(
 split(
-regexp_replace(
-coalesce(get_json_object(stcls_cr_line_sumry, '$.arStmtCrLineSumm[*]/'), ''),
-'^"|"$',
-''
-),
+regexp_replace(coalesce(get_json_object(stcls_cr_line_sumry, '$.arStmtCrLineSumm[*]/'), ''), '\"', '"'),
 '","'
 )
 ) e AS i, x
