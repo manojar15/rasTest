@@ -1,56 +1,45 @@
 WITH CREDIT_LINE_SUMMARY AS (
-    SELECT 
-        t.ar_id_item,
-        get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].apr'))               AS apr,
-        get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].fnceChrg'))          AS fnceChrg,
-        get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].frmDte'))            AS frmDte,
-        get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].perdcRte'))          AS perdcRte,
-        get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].prinOutstdBal'))     AS prinOutstdBal,
-        get_json_object(t.stcls_cr_line_sumry, concat('$.arStmtCrLineSumm[', e.i, '].toDte'))             AS toDte
-    FROM uat7400_racs11.RT_AR_STMNT_CR_LINE_SMRY_LN_RL t
-    LATERAL VIEW posexplode(
-        split(get_json_object(t.stcls_cr_line_sumry, '$.arStmtCrLineSumm[*]/'), '","')
-    ) e AS i, x
-    WHERE t.full_date = '20250728'
+SELECT
+b.AR_ID_ITEM,
+get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].apr')) AS apr,
+get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].fnceChrg')) AS fnceChrg,
+get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].frmDte')) AS frmDte,
+get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].perdcRte')) AS perdcRte,
+get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].prinOutstdBal')) AS prinOutstdBal,
+get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].toDte')) AS toDte
+FROM (
+SELECT
+t.AR_ID_ITEM,
+t.STCLS_CR_LINE_SUMRY
+FROM uat7400_racs11.RT_AR_STMNT_LN_RL t
+WHERE
+t.FULL_DATE = '20250728'
+AND t.STLR_STMNT_TYPE = 'DetailedStatement'
+AND t.ENART_VALUE LIKE '%LineOfCredit%'
+) b
+LATERAL VIEW posexplode(
+split(get_json_object(b.STCLS_CR_LINE_SUMRY, '$.arStmtCrLineSumm[*]/'), '","')
+) e AS i, x
+WHERE get_json_object(b.STCLS_CR_LINE_SUMRY, concat('$.arStmtCrLineSumm[', e.i, '].apr')) <> ''
 )
-
 SELECT DISTINCT
-    '792' AS `REC_TYP`,
-    (DRIVING_TABLE.ar_id_item || '-' || 'DetailedLOCStatement') AS FILTER_VAL,
-    1 AS `sort_order`,
-    '792' AS `sort_order_1`,
-    (DRIVING_TABLE.ar_id_item || '-' || DRIVING_TABLE.IP_ID) AS `accnt_nmbr`,
-    DRIVING_TABLE.ADT_MSG_UUID AS `uuid`,
-    DRIVING_TABLE.AR_ID_ITEM AS `Account Number`,
-
-    REPLACE(
-        CAST(COALESCE(CREDIT_LINE_SUMMARY.apr, CAST(0 AS BIGINT)) AS NUMERIC(14, 10)),
-        '.', ''
-    ) AS `APR`,
-
-    REPLACE(
-        CAST(COALESCE(CREDIT_LINE_SUMMARY.fnceChrg, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)),
-        '.', ''
-    ) AS `Finance Charge`,
-
-    CREDIT_LINE_SUMMARY.frmDte AS `From Date`,
-    CREDIT_LINE_SUMMARY.toDte AS `To Date`,
-
-    REPLACE(
-        CAST(COALESCE(CREDIT_LINE_SUMMARY.perdcRte, CAST(0 AS BIGINT)) AS NUMERIC(14, 10)),
-        '.', ''
-    ) AS `Periodic Rate`,
-
-    REPLACE(
-        CAST(COALESCE(CREDIT_LINE_SUMMARY.prinOutstdBal, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)),
-        '.', ''
-    ) AS `Principal Outstanding Balance`
-
+'792' AS REC_TYP,
+(DRIVING_TABLE.AR_ID_ITEM||'-'||'DetailedLOCStatement') AS FILTER_VAL,
+1 AS sort_order,
+'792' AS sort_order_1,
+(DRIVING_TABLE.AR_ID_ITEM ||'-' ||DRIVING_TABLE.IP_ID) AS accnt_nmbr,
+DRIVING_TABLE.ADT_MSG_UUID AS uuid,
+DRIVING_TABLE.AR_ID_ITEM AS Account Number,
+REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.apr, CAST(0 AS BIGINT)) AS NUMERIC(14, 10)), '.', '') AS APR,
+REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.fnceChrg, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS Finance Charge,
+CREDIT_LINE_SUMMARY.frmDte AS From Date,
+CREDIT_LINE_SUMMARY.toDte AS To Date,
+REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.perdcRte, CAST(0 AS BIGINT)) AS NUMERIC(14, 10)), '.', '') AS Periodic Rate,
+REPLACE(CAST(COALESCE(CREDIT_LINE_SUMMARY.prinOutstdBal, CAST(0 AS BIGINT)) AS NUMERIC(26, 4)), '.', '') AS Principal Outstanding Balance
 FROM uat7400_racs11.RT_AR_STMNT_LN_RL DRIVING_TABLE
 INNER JOIN CREDIT_LINE_SUMMARY
-    ON DRIVING_TABLE.AR_ID_ITEM = CREDIT_LINE_SUMMARY.AR_ID_ITEM
-   AND CREDIT_LINE_SUMMARY.apr <> ''
-WHERE DRIVING_TABLE.FULL_DATE = '20250728'
-  AND DRIVING_TABLE.STLR_STMNT_TYPE = 'DetailedStatement'
-  AND DRIVING_TABLE.enart_value LIKE '%LineOfCredit%'
-;
+ON DRIVING_TABLE.AR_ID_ITEM = CREDIT_LINE_SUMMARY.AR_ID_ITEM
+WHERE
+DRIVING_TABLE.FULL_DATE = '20250728'
+AND DRIVING_TABLE.STLR_STMNT_TYPE = 'DetailedStatement'
+AND DRIVING_TABLE.ENART_VALUE LIKE '%LineOfCredit%';
