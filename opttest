@@ -1,37 +1,40 @@
-WITH base_data AS (
+WITH base_period AS (
   SELECT 
     ARID_ITEM,
     BALTT_CODE,
     AABPTL_AMT,
-    SUBSTRING(AABPTL_END_DATE, 1, 4) AS end_year
+    AABPTL_END_DATE
   FROM uat7400_racs11.TB_APD_AR_BAL_PERIOD_LN_RL
   WHERE AABPTL_VALUE = 'Yearly'
-    AND SUBSTRING(AABPTL_END_DATE, 1, 4) IN ('2025', '2024')
     AND BALTT_CODE IN ('TotalFeeCollected', 'TotalInterestCollected')
+    AND (
+      SUBSTRING('20250728', 1, 4) = SUBSTRING(AABPTL_END_DATE, 1, 4)
+      OR (SUBSTRING('20250728', 1, 4) - 1) = SUBSTRING(AABPTL_END_DATE, 1, 4)
+    )
 ),
 TOT_FEES_YTD AS (
   SELECT ARID_ITEM, AABPTL_AMT
-  FROM base_data
+  FROM base_period
   WHERE BALTT_CODE = 'TotalFeeCollected'
-    AND end_year = '2025'
+    AND SUBSTRING('20250728', 1, 4) = SUBSTRING(AABPTL_END_DATE, 1, 4)
 ),
 TOT_INT_YTD AS (
   SELECT ARID_ITEM, AABPTL_AMT
-  FROM base_data
+  FROM base_period
   WHERE BALTT_CODE = 'TotalInterestCollected'
-    AND end_year = '2025'
+    AND SUBSTRING('20250728', 1, 4) = SUBSTRING(AABPTL_END_DATE, 1, 4)
 ),
 TOT_FEES_PREV_YTD AS (
   SELECT ARID_ITEM, AABPTL_AMT
-  FROM base_data
+  FROM base_period
   WHERE BALTT_CODE = 'TotalFeeCollected'
-    AND end_year = '2024'
+    AND (SUBSTRING('20250728', 1, 4) - 1) = SUBSTRING(AABPTL_END_DATE, 1, 4)
 ),
 TOT_INT_PREV_YTD AS (
   SELECT ARID_ITEM, AABPTL_AMT
-  FROM base_data
+  FROM base_period
   WHERE BALTT_CODE = 'TotalInterestCollected'
-    AND end_year = '2024'
+    AND (SUBSTRING('20250728', 1, 4) - 1) = SUBSTRING(AABPTL_END_DATE, 1, 4)
 )
 SELECT DISTINCT
   '791' AS `REC_TYP`,
